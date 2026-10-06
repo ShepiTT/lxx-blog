@@ -1,0 +1,86 @@
+---
+// 3D tag cloud that orbits the home page title. Tags in front pass over the title, tags behind
+// pass under it and fade; moving the pointer over the banner steers the spin.
+import { tagUrl } from '../lib/posts';
+
+interface Props {
+  tags: { tag: string; count: number }[];
+}
+const { tags } = Astro.props;
+const colors = ['#7fd3ff', '#ffb38a', '#ffd479', '#8ff0b5', '#c9b2ff', '#ff9ec4', '#7ff0e6', '#ff9b9b'];
+---
+
+<div class="tag-orbit" data-tag-orbit aria-label="文章标签">
+  <ul>
+    {tags.map(({ tag, count }, i) => (
+      <li>
+        <a href={tagUrl(tag)} style={`color:${colors[i % colors.length]};font-size:${15 + Math.min(count, 5) * 3}px`}>{tag}</a>
+      </li>
+    ))}
+  </ul>
+</div>
+
+<script>
+  document.querySelectorAll<HTMLElement>('[data-tag-orbit]').forEach((root) => {
+    const items = [...root.querySelectorAll<HTMLElement>('li')];
+    if (!items.length) return;
+    const n = items.length;
+    const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const steer = root.closest<HTMLElement>('.banner') ?? root;
+
+    // Unit-sphere points with Fibonacci spacing; stretched into an ellipsoid at draw time so the
+    // ring is wider than it is tall and wraps around the title.
+    const points = items.map((_, i) => {
+      const y = 1 - (i / Math.max(1, n - 1)) * 2;
+      const r = Math.sqrt(1 - y * y);
+      const theta = Math.PI * (3 - Math.sqrt(5)) * i;
+      return { x: Math.cos(theta) * r, y, z: Math.sin(theta) * r };
+    });
+
+    const baseX = 0.0012, baseY = 0.005;
+    let vx = baseX, vy = baseY;
+    let visible = true;
+
+    const draw = () => {
+      const rx = root.clientWidth / 2 - 30;
+      const ry = root.clientHeight / 2 - 14;
+      if (rx <= 0 || ry <= 0) return;
+      points.forEach((p, i) => {
+        const depth = (p.z + 1) / 2; // 0 = far behind, 1 = right in front
+        const el = items[i];
+        el.style.transform = `translate(-50%, -50%) translate3d(${(p.x * rx).toFixed(1)}px, ${(p.y * ry).toFixed(1)}px, 0) scale(${(0.7 + depth * 0.5).toFixed(3)})`;
+        el.style.opacity = (0.25 + depth * 0.75).toFixed(2);
+        // The title sits at z-index 50: front tags pass over it, back tags pass under it.
+        el.style.zIndex = String(Math.round(depth * 100));
+      });
+    };
+
+    const rotate = (ax: number, ay: number) => {
+      const [sx, cx, sy, cy] = [Math.sin(ax), Math.cos(ax), Math.sin(ay), Math.cos(ay)];
+      for (const p of points) {
+        const y1 = p.y * cx - p.z * sx, z1 = p.y * sx + p.z * cx;
+        const x2 = p.x * cy + z1 * sy, z2 = -p.x * sy + z1 * cy;
+        p.x = x2; p.y = y1; p.z = z2;
+      }
+    };
+
+    const tick = () => {
+      if (visible) { rotate(vx, vy); draw(); }
+      requestAnimationFrame(tick);
+    };
+
+    steer.addEventListener('pointermove', (e) => {
+      const rect = steer.getBoundingClientRect();
+      vy = ((e.clientX - rect.left) / rect.width - 0.5) * 0.024;
+      vx = -((e.clientY - rect.top) / rect.height - 0.5) * 0.012;
+    });
+    steer.addEventListener('pointerleave', () => { vx = baseX; vy = baseY; });
+
+    draw();
+    root.classList.add('ready');
+    new ResizeObserver(draw).observe(root);
+    if (reduce) return;
+    new IntersectionObserver(([entry]) => { visible = entry.isIntersecting; }).observe(root);
+    requestAnimationFrame(tick);
+  });
+</script>

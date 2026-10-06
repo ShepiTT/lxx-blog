@@ -1,0 +1,52 @@
+---
+import AdminLayout from '../../layouts/AdminLayout.astro';
+import { authConfigured, isLoggedIn } from '../../lib/admin/auth';
+import { SITE } from '../../site.config';
+
+export const prerender = false;
+
+if (isLoggedIn(Astro.cookies)) return Astro.redirect('/admin/');
+const configured = authConfigured();
+---
+
+<AdminLayout title="登录">
+  <main class="login-page" style={`--banner-image: url('${SITE.heroImage}')`}>
+    <form class="login-card" data-login>
+      <img src={SITE.avatar} width="72" height="72" alt="" />
+      <h1>{SITE.title} · 后台</h1>
+      {!configured && <p class="form-error">后台账号还没有配置，请先设置环境变量。</p>}
+      <label>账号<input name="username" autocomplete="username" required /></label>
+      <label>密码<input name="password" type="password" autocomplete="current-password" required /></label>
+      <p class="form-error" data-error hidden></p>
+      <button class="admin-btn primary" type="submit">登录</button>
+      <a class="login-back" href="/">← 返回博客</a>
+    </form>
+  </main>
+</AdminLayout>
+
+<script>
+  const form = document.querySelector<HTMLFormElement>('[data-login]')!;
+  const error = form.querySelector<HTMLElement>('[data-error]')!;
+  const button = form.querySelector<HTMLButtonElement>('button')!;
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    error.hidden = true;
+    button.disabled = true;
+    button.textContent = '登录中…';
+    const fd = new FormData(form);
+    try {
+      const res = await fetch('/api/admin/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username: fd.get('username'), password: fd.get('password') }),
+      });
+      if (res.ok) { location.href = '/admin/'; return; }
+      error.textContent = (await res.json()).error ?? '登录失败';
+    } catch {
+      error.textContent = '网络错误，请稍后再试';
+    }
+    error.hidden = false;
+    button.disabled = false;
+    button.textContent = '登录';
+  });
+</script>

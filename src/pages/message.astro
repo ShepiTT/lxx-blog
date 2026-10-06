@@ -1,0 +1,23 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Banner from '../components/Banner.astro';
+import Comments from '../components/Comments.astro';
+import Icon from '../components/Icon.astro';
+import { SITE } from '../site.config';
+---
+
+<BaseLayout title="留言" description={`给 ${SITE.author} 留言。`}>
+  <Banner slot="banner" title="留言板">
+    <p class="banner-subtitle">有什么想说的，都可以留在这里</p>
+  </Banner>
+  <div class="layout layout-single">
+    <div class="layout-main">
+      <section class="card message-intro">
+        <h2 class="card-heading"><Icon name="message" /> 写在前面</h2>
+        <p>欢迎来到留言板！技术问题、文章建议、交换友链，或者只是路过打个招呼，都可以在下面留言。</p>
+        <p>留言需要用 GitHub 账号登录，我会尽量一一回复～</p>
+      </section>
+      <div class="card"><Comments heading="留言" /></div>
+    </div>
+  </div>
+</BaseLayout>

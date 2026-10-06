@@ -1,0 +1,66 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Banner from '../components/Banner.astro';
+import Icon from '../components/Icon.astro';
+import { ALBUMS } from '../data/album';
+
+const total = ALBUMS.reduce((n, a) => n + a.photos.length, 0);
+---
+
+<BaseLayout title="相册" description="随手拍下的风景和日常。">
+  <Banner slot="banner" title="相册">
+    <p class="banner-subtitle">{ALBUMS.length} 个相册 · {total} 张照片</p>
+  </Banner>
+  <div class="layout layout-wide">
+    <div class="layout-main">
+      {ALBUMS.map((album) => (
+        <section class="card album">
+          <h2 class="card-heading"><Icon name="image" /> {album.name}<span class="album-count">{album.photos.length} 张</span></h2>
+          <p class="album-desc">{album.description}</p>
+          <div class="photo-wall">
+            {album.photos.map((photo) => (
+              <button class="photo" type="button" data-photo={photo.src} data-caption={photo.caption ?? ''}>
+                <img src={photo.src} alt={photo.caption ?? ''} loading="lazy" decoding="async" />
+                {photo.caption && <span class="photo-caption">{photo.caption}</span>}
+              </button>
+            ))}
+          </div>
+        </section>
+      ))}
+    </div>
+  </div>
+
+  <dialog class="lightbox" data-lightbox aria-label="查看大图">
+    <img data-lightbox-img alt="" />
+    <p class="lightbox-caption" data-lightbox-caption></p>
+    <button class="lightbox-btn lightbox-close" type="button" data-lightbox-close aria-label="关闭"><Icon name="close" size={22} /></button>
+    <button class="lightbox-btn lightbox-prev" type="button" data-lightbox-step="-1" aria-label="上一张"><Icon name="chevron" size={26} /></button>
+    <button class="lightbox-btn lightbox-next" type="button" data-lightbox-step="1" aria-label="下一张"><Icon name="chevron" size={26} /></button>
+  </dialog>
+</BaseLayout>
+
+<script>
+  const photos = [...document.querySelectorAll<HTMLButtonElement>('[data-photo]')];
+  const box = document.querySelector<HTMLDialogElement>('[data-lightbox]')!;
+  const img = box.querySelector<HTMLImageElement>('[data-lightbox-img]')!;
+  const caption = box.querySelector<HTMLElement>('[data-lightbox-caption]')!;
+  let current = 0;
+
+  const show = (i: number) => {
+    current = (i + photos.length) % photos.length;
+    const p = photos[current];
+    img.src = p.dataset.photo!;
+    img.alt = p.dataset.caption ?? '';
+    caption.textContent = p.dataset.caption ? `${p.dataset.caption}（${current + 1} / ${photos.length}）` : `${current + 1} / ${photos.length}`;
+  };
+
+  photos.forEach((p, i) => p.addEventListener('click', () => { show(i); box.showModal(); }));
+  box.querySelector('[data-lightbox-close]')!.addEventListener('click', () => box.close());
+  box.querySelectorAll<HTMLButtonElement>('[data-lightbox-step]').forEach((b) =>
+    b.addEventListener('click', () => show(current + Number(b.dataset.lightboxStep))));
+  box.addEventListener('click', (e) => { if (e.target === box) box.close(); });
+  box.addEventListener('keydown', (e) => {
+    if (e.key === 'ArrowLeft') show(current - 1);
+    if (e.key === 'ArrowRight') show(current + 1);
+  });
+</script>

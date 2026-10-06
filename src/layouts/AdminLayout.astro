@@ -1,0 +1,33 @@
+---
+import '../styles/global.css';
+import '../styles/admin.css';
+import { SITE } from '../site.config';
+
+interface Props {
+  title: string;
+}
+const { title } = Astro.props;
+---
+
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="robots" content="noindex, nofollow" />
+    <title>{title} | {SITE.title} 后台</title>
+    <link rel="icon" type="image/svg+xml" href={SITE.avatar} />
+    <script is:inline>
+      (() => {
+        let stored = null;
+        try { stored = localStorage.getItem('theme'); } catch {}
+        const dark = stored ? stored === 'dark' : matchMedia('(prefers-color-scheme: dark)').matches;
+        document.documentElement.dataset.theme = dark ? 'dark' : 'light';
+      })();
+    </script>
+  </head>
+  <body class="admin">
+    <slot />
+    <div class="toast" role="status" aria-live="polite" data-toast hidden></div>
+  </body>
+</html>

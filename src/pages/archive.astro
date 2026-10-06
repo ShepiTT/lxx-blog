@@ -1,0 +1,41 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Banner from '../components/Banner.astro';
+import Sidebar from '../components/Sidebar.astro';
+import { getPosts, postUrl, isoDate } from '../lib/posts';
+
+const posts = await getPosts();
+const years = new Map<number, typeof posts>();
+for (const post of posts) {
+  const year = post.data.date.getUTCFullYear();
+  years.set(year, [...(years.get(year) ?? []), post]);
+}
+---
+
+<BaseLayout title="时间轴" description="按时间浏览全部文章。">
+  <Banner slot="banner" title="时间轴" />
+  <div class="layout">
+    <div class="layout-main">
+      <div class="card timeline-card">
+        <p class="timeline-total">文章总览 - {posts.length}</p>
+        {[...years].map(([year, list]) => (
+          <section class="timeline-year">
+            <h2>{year}</h2>
+            <ol>
+              {list.map((post) => (
+                <li>
+                  <a class="timeline-thumb" href={postUrl(post)} tabindex="-1" aria-hidden="true"><img src={post.data.cover} alt="" width="80" height="80" loading="lazy" /></a>
+                  <div>
+                    <time datetime={isoDate(post.data.date)}>{isoDate(post.data.date)}</time>
+                    <a href={postUrl(post)}>{post.data.title}</a>
+                  </div>
+                </li>
+              ))}
+            </ol>
+          </section>
+        ))}
+      </div>
+    </div>
+    <Sidebar />
+  </div>
+</BaseLayout>

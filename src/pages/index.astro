@@ -1,0 +1,57 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Banner from '../components/Banner.astro';
+import PostCard from '../components/PostCard.astro';
+import CategoryNav from '../components/CategoryNav.astro';
+import Sidebar from '../components/Sidebar.astro';
+import Icon from '../components/Icon.astro';
+import TagSphere from '../components/TagSphere.astro';
+import { SITE } from '../site.config';
+import { getPosts, tagCounts } from '../lib/posts';
+
+const posts = await getPosts();
+const tags = tagCounts(posts);
+---
+
+<BaseLayout>
+  <Banner slot="banner" full>
+    <div class="hero-stage">
+      <TagSphere tags={tags} />
+      <h1 class="hero-title">{SITE.title}</h1>
+      <p class="hero-subtitle">
+        <span data-typewriter={JSON.stringify(SITE.typewriter)}>{SITE.typewriter[0]}</span><span class="typed-cursor" aria-hidden="true">|</span>
+      </p>
+    </div>
+    <a slot="after" class="scroll-down" href="#posts" aria-label="向下浏览文章"><Icon name="down" size={28} /></a>
+  </Banner>
+
+  <div class="layout" id="posts">
+    <div class="layout-main">
+      <CategoryNav posts={posts} current="all" />
+      <div class="post-list">
+        {posts.map((post, i) => <PostCard post={post} eager={i === 0} />)}
+      </div>
+    </div>
+    <Sidebar />
+  </div>
+</BaseLayout>
+
+<script>
+  // Type each slogan out, pause, delete it, then move on to the next one.
+  const el = document.querySelector<HTMLElement>('[data-typewriter]');
+  if (el && !matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    const texts: string[] = JSON.parse(el.dataset.typewriter!);
+    let t = 0, i = 0, deleting = false;
+    const step = () => {
+      const text = texts[t];
+      i += deleting ? -1 : 1;
+      el.textContent = text.slice(0, i);
+      let delay = deleting ? 60 : 150;
+      if (!deleting && i === text.length) { deleting = true; delay = 2200; }
+      else if (deleting && i === 0) { deleting = false; t = (t + 1) % texts.length; delay = 500; }
+      setTimeout(step, delay);
+    };
+    el.textContent = '';
+    setTimeout(step, 600);
+  }
+</script>

@@ -1,0 +1,108 @@
+<canvas class="petals" aria-hidden="true" data-petals></canvas>
+
+<script>
+  // Falling sakura petals drawn on one canvas. Off for reduced-motion users unless they turn it on.
+  const canvas = document.querySelector<HTMLCanvasElement>('[data-petals]')!;
+  const ctx = canvas.getContext('2d')!;
+  const button = document.querySelector<HTMLButtonElement>('[data-petals-toggle]');
+
+  type Petal = { x: number; y: number; size: number; speed: number; drift: number; angle: number; spin: number; phase: number };
+  let petals: Petal[] = [];
+  let enabled = false;
+  let frame = 0;
+  let width = 0, height = 0;
+
+  let dpr = 1;
+  const resize = () => {
+    dpr = Math.min(devicePixelRatio || 1, 1.5);
+    width = innerWidth; height = innerHeight;
+    canvas.width = width * dpr; canvas.height = height * dpr;
+  };
+
+  // Draw the petal shape once; every frame just stamps this sprite with a transform.
+  const SPRITE = 48;
+  const sprite = document.createElement('canvas');
+  sprite.width = sprite.height = SPRITE;
+  (() => {
+    const s = sprite.getContext('2d')!;
+    const r = SPRITE / 2 - 2;
+    s.translate(SPRITE / 2, SPRITE / 2);
+    const g = s.createLinearGradient(0, -r, 0, r);
+    g.addColorStop(0, 'rgba(255, 192, 210, .95)');
+    g.addColorStop(1, 'rgba(255, 143, 177, .85)');
+    s.fillStyle = g;
+    s.beginPath();
+    s.moveTo(0, -r);
+    s.bezierCurveTo(r * 0.9, -r * 0.6, r * 0.8, r * 0.6, 0, r);
+    s.bezierCurveTo(-r * 0.8, r * 0.6, -r * 0.9, -r * 0.6, -r * 0.15, -r * 0.75);
+    s.lineTo(0, -r * 0.55);
+    s.closePath();
+    s.fill();
+  })();
+
+  const spawn = (initial: boolean): Petal => ({
+    x: Math.random() * width,
+    y: initial ? Math.random() * height : -20,
+    size: 7 + Math.random() * 8,
+    speed: 0.5 + Math.random() * 0.9,
+    drift: 0.3 + Math.random() * 0.6,
+    angle: Math.random() * Math.PI * 2,
+    spin: (Math.random() - 0.5) * 0.03,
+    phase: Math.random() * Math.PI * 2,
+  });
+
+  const drawPetal = (p: Petal) => {
+    // Rotation plus a vertical squash that fakes the petal flipping as it falls.
+    const cos = Math.cos(p.angle), sin = Math.sin(p.angle);
+    const flip = 0.6 + 0.4 * Math.abs(Math.sin(p.phase));
+    ctx.setTransform(dpr * cos, dpr * sin, -dpr * sin * flip, dpr * cos * flip, dpr * p.x, dpr * p.y);
+    ctx.drawImage(sprite, -p.size, -p.size, p.size * 2, p.size * 2);
+  };
+
+  const loop = () => {
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    for (let i = 0; i < petals.length; i++) {
+      const p = petals[i];
+      p.phase += 0.02;
+      p.y += p.speed;
+      p.x += Math.sin(p.phase) * p.drift + 0.3;
+      p.angle += p.spin;
+      if (p.y > height + 20 || p.x > width + 20) petals[i] = spawn(false);
+      drawPetal(p);
+    }
+    frame = requestAnimationFrame(loop);
+  };
+
+  const setEnabled = (on: boolean) => {
+    enabled = on;
+    button?.setAttribute('aria-pressed', String(on));
+    cancelAnimationFrame(frame);
+    if (on) {
+      resize();
+      const count = width < 700 ? 14 : 26;
+      petals = Array.from({ length: count }, () => spawn(true));
+      canvas.hidden = false;
+      loop();
+    } else {
+      ctx.setTransform(1, 0, 0, 1, 0, 0);
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      canvas.hidden = true;
+    }
+  };
+
+  let stored: string | null = null;
+  try { stored = localStorage.getItem('petals'); } catch {}
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  setEnabled(stored ? stored === 'on' : !reduce);
+
+  button?.addEventListener('click', () => {
+    try { localStorage.setItem('petals', enabled ? 'off' : 'on'); } catch {}
+    setEnabled(!enabled);
+  });
+  addEventListener('resize', () => { if (enabled) resize(); });
+  document.addEventListener('visibilitychange', () => {
+    if (!enabled) return;
+    if (document.hidden) cancelAnimationFrame(frame); else loop();
+  });
+</script>

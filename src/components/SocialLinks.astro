@@ -1,0 +1,20 @@
+---
+import Icon from './Icon.astro';
+import { SOCIALS } from '../site.config';
+
+interface Props {
+  labels?: boolean;
+}
+const { labels = false } = Astro.props;
+---
+
+<ul class:list={['social-links', { 'with-labels': labels }]}>
+  {SOCIALS.map((s) => (
+    <li>
+      <a href={s.href} aria-label={labels ? undefined : s.name} target={s.href.startsWith('http') ? '_blank' : undefined} rel={s.href.startsWith('http') ? 'noopener' : undefined}>
+        <Icon name={s.icon} size={18} />
+        {labels && <span>{s.name}</span>}
+      </a>
+    </li>
+  ))}
+</ul>

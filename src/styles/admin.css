@@ -1,0 +1,103 @@
+/* Admin pages: plain, form-first layout on top of the site's colour tokens. */
+body.admin { background: var(--bg); }
+
+.admin-bar {
+  position: sticky; top: 0; z-index: 10;
+  display: flex; align-items: center; gap: 12px; padding: 12px 24px;
+  background: var(--card); box-shadow: 0 1px 0 var(--line);
+}
+.admin-brand { margin-right: auto; color: var(--text-strong); font-size: 17px; font-weight: 700; }
+.admin-mode { color: var(--text-2); font-size: 13px; }
+.admin-main { display: flex; flex-direction: column; gap: 20px; width: min(1200px, 100% - 32px); margin: 24px auto 60px; }
+
+.admin-btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+  height: 36px; padding: 0 16px; border: 1px solid var(--theme); border-radius: 8px;
+  background: transparent; color: var(--theme); font-size: 14px; white-space: nowrap; cursor: pointer;
+  transition: background-color .2s, color .2s, border-color .2s;
+}
+.admin-btn:hover { background: var(--theme-soft); }
+.admin-btn.primary { background: var(--theme); color: #fff; }
+.admin-btn.primary:hover { background: var(--hover); border-color: var(--hover); }
+.admin-btn.ghost { border-color: var(--line); color: var(--text); }
+.admin-btn.ghost:hover { border-color: var(--theme); color: var(--theme); background: transparent; }
+.admin-btn:disabled { opacity: .6; cursor: wait; }
+
+.admin-panel { padding: 20px 24px; border-radius: var(--radius); background: var(--card); box-shadow: var(--shadow); }
+.panel-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+.panel-head h2 { margin: 0; font-size: 18px; }
+.panel-head small { color: var(--text-2); font-size: 14px; font-weight: 400; }
+
+.admin-table { width: 100%; border-collapse: collapse; font-size: 14px; }
+.admin-table th { padding: 8px 10px; border-bottom: 1px solid var(--line); color: var(--text-2); font-weight: 500; text-align: left; }
+.admin-table td { padding: 10px; border-bottom: 1px solid var(--line); color: var(--text-strong); }
+.admin-table tr:hover td { background: var(--theme-soft); }
+.admin-table td:nth-child(n+2) { color: var(--text-2); white-space: nowrap; }
+.row-actions { text-align: right; }
+.row-actions a, .row-actions button { margin-left: 12px; padding: 0; border: 0; background: none; color: var(--theme); font-size: 14px; cursor: pointer; }
+.row-actions button { color: #e05a5a; }
+.row-actions a:hover, .row-actions button:hover { text-decoration: underline; }
+.badge { margin-left: 8px; padding: 1px 8px; border-radius: 10px; background: #fff3e0; color: #e67e22; font-size: 12px; }
+
+.form-error { margin: 0; padding: 10px 14px; border-radius: 8px; background: rgba(224, 90, 90, .1); color: #e05a5a; font-size: 14px; }
+
+/* Login */
+.login-page {
+  display: grid; place-items: center; min-height: 100vh; padding: 20px;
+  background: linear-gradient(rgba(0, 0, 0, .25), rgba(0, 0, 0, .25)), var(--banner-image) center / cover;
+}
+.login-card {
+  display: flex; flex-direction: column; gap: 14px; width: min(360px, 100%); padding: 32px 28px;
+  border-radius: 16px; background: var(--card); box-shadow: 0 20px 60px rgba(0, 0, 0, .3); text-align: center;
+}
+.login-card img { margin: 0 auto; border-radius: 50%; }
+.login-card h1 { margin: 0 0 4px; font-size: 20px; }
+.login-back { color: var(--text-2); font-size: 13px; }
+.login-back:hover { color: var(--theme); }
+
+/* Forms */
+.admin label { display: flex; flex-direction: column; gap: 6px; color: var(--text-2); font-size: 13px; text-align: left; }
+.admin input:not([type="checkbox"]):not([type="file"]), .admin select, .admin textarea {
+  width: 100%; padding: 8px 12px; border: 1px solid var(--line); border-radius: 8px;
+  background: var(--bg); color: var(--text-strong); font: 15px/1.6 var(--font);
+  transition: border-color .2s, box-shadow .2s;
+}
+.admin input:focus, .admin select:focus, .admin textarea:focus { outline: 0; border-color: var(--theme); box-shadow: 0 0 0 3px var(--theme-soft); }
+.admin input[readonly] { opacity: .6; }
+.edit-draft { flex-direction: row !important; align-items: center; color: var(--text) !important; font-size: 14px !important; }
+.edit-meta { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px 18px; }
+.span-2 { grid-column: 1 / -1; }
+.cover-field, .talk-images-field { display: flex; flex-direction: column; gap: 6px; color: var(--text-2); font-size: 13px; }
+.cover-row { display: flex; align-items: center; gap: 10px; }
+.cover-row img { width: 96px; height: 60px; border-radius: 6px; object-fit: cover; }
+.file-btn { flex-direction: row !important; color: var(--text) !important; }
+.talk-image-list { display: flex; flex-wrap: wrap; gap: 8px; }
+.talk-image-item { position: relative; width: 96px; height: 96px; }
+.talk-image-item img { width: 100%; height: 100%; border-radius: 8px; object-fit: cover; }
+.talk-image-item button {
+  position: absolute; top: -6px; right: -6px; width: 22px; height: 22px; border: 0; border-radius: 50%;
+  background: #e05a5a; color: #fff; font-size: 14px; line-height: 1; cursor: pointer;
+}
+.talk-images-field .file-btn { align-self: flex-start; }
+
+.edit-body { display: flex; flex-direction: column; gap: 10px; }
+.edit-toolbar { display: flex; align-items: center; justify-content: space-between; color: var(--text-2); font-size: 13px; }
+.edit-panes { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; min-height: 60vh; }
+.edit-panes textarea { min-height: 60vh; resize: vertical; font: 14px/1.8 var(--mono) !important; }
+.edit-preview { max-height: 75vh; overflow-y: auto; padding: 4px 14px; border: 1px dashed var(--line); border-radius: 8px; }
+
+.toast {
+  position: fixed; left: 50%; bottom: 32px; z-index: 50; transform: translateX(-50%);
+  padding: 10px 20px; border-radius: 10px; background: #1f2d3d; color: #fff; font-size: 14px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, .25);
+}
+.toast.error { background: #c0392b; }
+
+@media (max-width: 768px) {
+  .admin-bar { flex-wrap: wrap; padding: 10px 16px; }
+  .admin-mode { display: none; }
+  .edit-meta { grid-template-columns: 1fr; }
+  .edit-panes { grid-template-columns: 1fr; }
+  .edit-preview { max-height: none; }
+  .admin-table th:nth-child(2), .admin-table td:nth-child(2) { display: none; }
+}

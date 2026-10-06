@@ -1,0 +1,114 @@
+---
+import AdminLayout from '../../layouts/AdminLayout.astro';
+import { DIRS, summarize, type ItemType } from '../../lib/admin/content';
+import { getStorage, StorageError } from '../../lib/admin/storage';
+import { categoryName } from '../../lib/posts';
+
+export const prerender = false;
+
+let error = '';
+let mode = '';
+const lists: Record<ItemType, ReturnType<typeof summarize>[]> = { blog: [], talks: [] };
+try {
+  const storage = getStorage();
+  mode = storage.mode;
+  for (const type of ['blog', 'talks'] as ItemType[]) {
+    const files = (await storage.list(DIRS[type])).filter((f) => f.name.endsWith('.md'));
+    const items = await Promise.all(files.map(async (f) => {
+      const file = await storage.read(f.path);
+      return file ? summarize(type, f.name.replace(/\.md$/, ''), file.content) : null;
+    }));
+    lists[type] = items.filter((i) => i !== null).sort((a, b) => b.date.localeCompare(a.date));
+  }
+} catch (err) {
+  error = err instanceof StorageError ? err.message : '读取内容失败';
+}
+
+const fmtTalk = (iso: string) => iso.replace('T', ' ').slice(0, 16);
+---
+
+<AdminLayout title="管理">
+  <header class="admin-bar">
+    <a class="admin-brand" href="/admin/">博客后台</a>
+    <span class="admin-mode">{mode === 'local' ? '本地模式：直接保存到电脑上的项目文件' : mode === 'github' ? '在线模式：保存后约 1 分钟网站自动更新' : ''}</span>
+    <a class="admin-btn ghost" href="/" target="_blank">查看网站</a>
+    <button class="admin-btn ghost" type="button" data-logout>退出登录</button>
+  </header>
+
+  <main class="admin-main">
+    {error && <p class="form-error">{error}</p>}
+
+    <section class="admin-panel">
+      <div class="panel-head">
+        <h2>文章 <small>{lists.blog.length}</small></h2>
+        <a class="admin-btn primary" href="/admin/edit/?type=blog">写文章</a>
+      </div>
+      <table class="admin-table">
+        <thead><tr><th>标题</th><th>分类</th><th>日期</th><th></th></tr></thead>
+        <tbody>
+          {lists.blog.map((p) => (
+            <tr>
+              <td>{p.title}{p.draft && <span class="badge">草稿</span>}</td>
+              <td>{categoryName(p.category)}</td>
+              <td>{p.date}</td>
+              <td class="row-actions">
+                <a href={`/admin/edit/?type=blog&id=${p.id}`}>编辑</a>
+                <a href={`/posts/${p.id}/`} target="_blank">查看</a>
+                <button type="button" data-delete="blog" data-id={p.id} data-name={p.title}>删除</button>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </section>
+
+    <section class="admin-panel">
+      <div class="panel-head">
+        <h2>说说 <small>{lists.talks.length}</small></h2>
+        <a class="admin-btn primary" href="/admin/edit/?type=talks">发说说</a>
+      </div>
+      <table class="admin-table">
+        <thead><tr><th>内容</th><th>时间</th><th></th></tr></thead>
+        <tbody>
+          {lists.talks.map((t) => (
+            <tr>
+              <td>{t.title}</td>
+              <td>{fmtTalk(t.date)}</td>
+              <td class="row-actions">
+                <a href={`/admin/edit/?type=talks&id=${t.id}`}>编辑</a>
+                <button type="button" data-delete="talks" data-id={t.id} data-name={t.title}>删除</button>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </section>
+  </main>
+</AdminLayout>
+
+<script>
+  import { toast } from '../../lib/admin/toast';
+
+  document.querySelector('[data-logout]')!.addEventListener('click', async () => {
+    await fetch('/api/admin/logout', { method: 'POST' });
+    location.href = '/admin/login/';
+  });
+
+  document.querySelectorAll<HTMLButtonElement>('[data-delete]').forEach((btn) => btn.addEventListener('click', async () => {
+    if (!confirm(`确定删除「${btn.dataset.name}」吗？删除后网站上也会消失。`)) return;
+    btn.disabled = true;
+    const res = await fetch('/api/admin/item', {
+      method: 'DELETE',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ type: btn.dataset.delete, id: btn.dataset.id }),
+    });
+    const data = await res.json().catch(() => ({}));
+    if (res.ok) {
+      btn.closest('tr')?.remove();
+      toast(data.mode === 'github' ? '已删除，约 1 分钟后网站更新' : '已删除');
+    } else {
+      btn.disabled = false;
+      toast(data.error ?? '删除失败', true);
+    }
+  }));
+</script>

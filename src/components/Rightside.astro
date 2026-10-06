@@ -1,0 +1,25 @@
+---
+import Icon from './Icon.astro';
+---
+
+<div class="rightside" aria-label="快捷操作">
+  <!-- Theme switching is wired up in Header.astro for every [data-theme-toggle]. -->
+  <button type="button" data-theme-toggle aria-label="切换深色模式" title="切换深色模式">
+    <span class="when-light"><Icon name="moon" /></span>
+    <span class="when-dark"><Icon name="sun" /></span>
+  </button>
+  <button type="button" data-petals-toggle aria-label="开关花瓣飘落" title="开关花瓣飘落" aria-pressed="true">
+    <Icon name="flower" />
+  </button>
+  <button type="button" data-to-top aria-label="回到顶部" title="回到顶部" class="to-top">
+    <Icon name="up" />
+  </button>
+</div>
+
+<script>
+  const toTop = document.querySelector<HTMLButtonElement>('[data-to-top]')!;
+  toTop.addEventListener('click', () => scrollTo({ top: 0, behavior: 'smooth' }));
+  const onScroll = () => toTop.classList.toggle('show', scrollY > 300);
+  addEventListener('scroll', onScroll, { passive: true });
+  onScroll();
+</script>

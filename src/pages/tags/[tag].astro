@@ -1,0 +1,36 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Banner from '../../components/Banner.astro';
+import Sidebar from '../../components/Sidebar.astro';
+import PostCard from '../../components/PostCard.astro';
+import Icon from '../../components/Icon.astro';
+import { getPosts, tagCounts, type Post } from '../../lib/posts';
+
+export async function getStaticPaths() {
+  const posts = await getPosts();
+  return tagCounts(posts).map(({ tag }) => ({
+    params: { tag },
+    props: { tag, posts: posts.filter((p) => p.data.tags.includes(tag)) },
+  }));
+}
+
+interface Props {
+  tag: string;
+  posts: Post[];
+}
+const { tag, posts } = Astro.props;
+---
+
+<BaseLayout title={`标签：${tag}`} description={`标签「${tag}」下的 ${posts.length} 篇文章。`}>
+  <Banner slot="banner" title={`标签：${tag}`} />
+  <div class="layout">
+    <div class="layout-main">
+      <div class="card category-bar">
+        <h2 class="category-heading"><Icon name="tag" /> {tag} · 共 {posts.length} 篇</h2>
+        <a class="more-link" href="/tags/">全部标签 <Icon name="chevron" size={14} /></a>
+      </div>
+      <div class="post-list">{posts.map((post) => <PostCard post={post} />)}</div>
+    </div>
+    <Sidebar />
+  </div>
+</BaseLayout>

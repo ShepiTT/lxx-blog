@@ -1,0 +1,34 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Banner from '../../components/Banner.astro';
+import Sidebar from '../../components/Sidebar.astro';
+import PostCard from '../../components/PostCard.astro';
+import CategoryNav from '../../components/CategoryNav.astro';
+import { CATEGORIES } from '../../site.config';
+import { getPosts } from '../../lib/posts';
+
+export function getStaticPaths() {
+  return CATEGORIES.map((c) => ({ params: { category: c.id }, props: { category: c } }));
+}
+
+const { category } = Astro.props;
+const all = await getPosts();
+const posts = all.filter((p) => p.data.category === category.id);
+---
+
+<BaseLayout title={`分类：${category.name}`} description={category.description}>
+  <Banner slot="banner" title={`分类：${category.name}`}>
+    <p class="banner-subtitle">{category.description}</p>
+  </Banner>
+  <div class="layout">
+    <div class="layout-main">
+      <CategoryNav posts={all} current={category.id} heading={category.name} />
+      {posts.length ? (
+        <div class="post-list">{posts.map((post) => <PostCard post={post} />)}</div>
+      ) : (
+        <div class="card empty-state">这个分类还没有文章，敬请期待～</div>
+      )}
+    </div>
+    <Sidebar />
+  </div>
+</BaseLayout>

@@ -1,0 +1,98 @@
+---
+import { render } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Banner from '../../components/Banner.astro';
+import Sidebar from '../../components/Sidebar.astro';
+import Comments from '../../components/Comments.astro';
+import Icon from '../../components/Icon.astro';
+import { SITE } from '../../site.config';
+import { getPosts, postUrl, tagUrl, categoryUrl, categoryName, isoDate, readingMinutes, wordCount, type Post } from '../../lib/posts';
+
+export async function getStaticPaths() {
+  const posts = await getPosts();
+  return posts.map((post, i) => ({
+    params: { slug: post.id },
+    props: { post, newer: posts[i - 1], older: posts[i + 1] },
+  }));
+}
+
+interface Props {
+  post: Post;
+  newer?: Post;
+  older?: Post;
+}
+
+const { post, newer, older } = Astro.props;
+const { title, description, date, category, tags, cover } = post.data;
+const { Content, headings } = await render(post);
+const toc = headings.filter((h) => h.depth === 2 || h.depth === 3);
+const url = new URL(postUrl(post), Astro.site).href;
+---
+
+<BaseLayout title={title} description={description} image={cover} type="article">
+  <Banner slot="banner" image={cover}>
+    <h1 class="post-banner-title">{title}</h1>
+    <div class="post-banner-meta">
+      <span><Icon name="calendar" size={15} /> 发表于 {isoDate(date)}</span>
+      <span><Icon name="folder" size={15} /> <a href={categoryUrl(category)}>{categoryName(category)}</a></span>
+      <span><Icon name="file" size={15} /> 字数 {wordCount(post.body)}</span>
+      <span><Icon name="clock" size={15} /> 阅读约 {readingMinutes(post.body)} 分钟</span>
+      <span><Icon name="eye" size={15} /> 阅读量 <span id="busuanzi_value_page_pv">--</span></span>
+    </div>
+  </Banner>
+
+  <div class="layout">
+    <div class="layout-main">
+      <article class="card article">
+        <div class="prose">
+          <Content />
+        </div>
+
+        <div class="post-copyright">
+          <p><strong>文章作者：</strong><a href="/about/">{SITE.author}</a></p>
+          <p><strong>文章链接：</strong><a href={url}>{url}</a></p>
+          <p><strong>版权声明：</strong>本文为原创内容，转载请注明来自 <a href="/">{SITE.title}</a>。</p>
+        </div>
+
+        <div class="article-tools">
+          <ul class="tag-pills">
+            {tags.map((tag) => <li><a href={tagUrl(tag)}><Icon name="tag" size={13} /> {tag}</a></li>)}
+          </ul>
+          <button class="share-button" type="button" data-copy-link><Icon name="link" size={15} /><span>复制链接</span></button>
+        </div>
+      </article>
+
+      <nav class="pagination-post" aria-label="上一篇和下一篇">
+        {newer && (
+          <a class="pager" href={postUrl(newer)} style={`--pager-image: url('${newer.data.cover}')`}>
+            <span>上一篇</span><strong>{newer.data.title}</strong>
+          </a>
+        )}
+        {older && (
+          <a class="pager pager-next" href={postUrl(older)} style={`--pager-image: url('${older.data.cover}')`}>
+            <span>下一篇</span><strong>{older.data.title}</strong>
+          </a>
+        )}
+      </nav>
+
+      <div class="card">
+        <Comments />
+      </div>
+    </div>
+    <Sidebar toc={toc} />
+  </div>
+</BaseLayout>
+
+<script>
+  const button = document.querySelector<HTMLButtonElement>('[data-copy-link]');
+  const label = button?.querySelector('span');
+  button?.addEventListener('click', async () => {
+    try {
+      await navigator.clipboard.writeText(location.href);
+      if (label) label.textContent = '已复制';
+    } catch {
+      if (label) label.textContent = '复制失败';
+    }
+    setTimeout(() => { if (label) label.textContent = '复制链接'; }, 2000);
+  });
+</script>

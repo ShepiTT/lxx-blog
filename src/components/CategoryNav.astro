@@ -1,0 +1,25 @@
+---
+import Icon from './Icon.astro';
+import { CATEGORIES } from '../site.config';
+import { categoryUrl, type Post } from '../lib/posts';
+
+interface Props {
+  posts: Post[];
+  current?: string;
+  heading?: string;
+}
+const { posts, current = 'all', heading = '最新文章' } = Astro.props;
+const items = [
+  { id: 'all', name: '全部', href: '/#posts', count: posts.length },
+  ...CATEGORIES.map((c) => ({ id: c.id, name: c.name, href: categoryUrl(c.id), count: posts.filter((p) => p.data.category === c.id).length })),
+];
+---
+
+<div class="card category-bar">
+  <h2 class="category-heading"><Icon name="file" /> {heading}</h2>
+  <nav class="category-tabs" aria-label="文章分类">
+    {items.map((item) => (
+      <a href={item.href} aria-current={item.id === current ? 'page' : undefined}>{item.name}<sup>{item.count}</sup></a>
+    ))}
+  </nav>
+</div>

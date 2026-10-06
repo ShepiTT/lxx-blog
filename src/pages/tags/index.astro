@@ -1,0 +1,28 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Banner from '../../components/Banner.astro';
+import Sidebar from '../../components/Sidebar.astro';
+import { getPosts, tagCounts, tagUrl } from '../../lib/posts';
+
+const tags = tagCounts(await getPosts());
+const max = Math.max(1, ...tags.map((t) => t.count));
+const colors = ['#49b1f5', '#ff7242', '#f6a23b', '#3fc380', '#a07de8', '#ff6b9b', '#20b2aa', '#e05a5a'];
+const size = (count: number) => Math.round(16 + ((count - 1) / Math.max(1, max - 1)) * 18);
+---
+
+<BaseLayout title="标签" description="按话题浏览所有文章。">
+  <Banner slot="banner" title="标签" />
+  <div class="layout">
+    <div class="layout-main">
+      <div class="card">
+        <p class="timeline-total">标签 - {tags.length}</p>
+        <div class="tag-cloud-page">
+          {tags.map(({ tag, count }, i) => (
+            <a href={tagUrl(tag)} style={`color:${colors[i % colors.length]};font-size:${size(count)}px`}>{tag}<sup>{count}</sup></a>
+          ))}
+        </div>
+      </div>
+    </div>
+    <Sidebar />
+  </div>
+</BaseLayout>

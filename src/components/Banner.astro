@@ -1,0 +1,52 @@
+---
+// Full-bleed illustrated header shared by every page; the home page uses the full-screen variant,
+// which also gets a scroll parallax: the image lags behind, darkens and blurs as you scroll past it.
+import Waves from './Waves.astro';
+import { SITE } from '../site.config';
+
+interface Props {
+  image?: string;
+  title?: string;
+  full?: boolean;
+}
+const { image = SITE.heroImage, title, full = false } = Astro.props;
+---
+
+<header class:list={['banner', { 'banner-full': full }]} data-parallax={full ? '' : undefined}>
+  <div class="banner-bg" style={`background-image: url('${image}')`} data-banner-bg></div>
+  <div class="banner-shade" data-banner-shade></div>
+  <div class="banner-content" data-banner-content>
+    {title && <h1 class="banner-title">{title}</h1>}
+    <slot />
+  </div>
+  <slot name="after" />
+  <Waves />
+</header>
+
+<script>
+  const banner = document.querySelector<HTMLElement>('[data-parallax]');
+  if (banner && !matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    const bg = banner.querySelector<HTMLElement>('[data-banner-bg]')!;
+    const shade = banner.querySelector<HTMLElement>('[data-banner-shade]')!;
+    const content = banner.querySelector<HTMLElement>('[data-banner-content]')!;
+    let ticking = false;
+
+    const update = () => {
+      ticking = false;
+      const h = banner.offsetHeight;
+      const y = Math.min(scrollY, h);
+      const p = y / h;
+      bg.style.transform = `translate3d(0, ${(y * 0.45).toFixed(1)}px, 0) scale(${(1 + p * 0.08).toFixed(3)})`;
+      bg.style.filter = p > 0.02 ? `blur(${(p * 6).toFixed(1)}px)` : '';
+      shade.style.opacity = (p * 0.55).toFixed(3);
+      content.style.transform = `translate3d(0, ${(y * 0.3).toFixed(1)}px, 0)`;
+      content.style.opacity = Math.max(0, 1 - p * 1.4).toFixed(3);
+      banner.classList.toggle('scrolled', p > 0.15);
+    };
+
+    addEventListener('scroll', () => {
+      if (!ticking) { ticking = true; requestAnimationFrame(update); }
+    }, { passive: true });
+    update();
+  }
+</script>

@@ -1,0 +1,29 @@
+---
+import { SITE } from '../site.config';
+
+const since = Number(SITE.startDate.slice(0, 4));
+const year = new Date().getFullYear();
+---
+
+<footer class="footer" style={`--banner-image: url('${SITE.heroImage}')`}>
+  <div class="footer-content">
+    <p>©{since === year ? year : `${since} - ${year}`} By {SITE.author}</p>
+    <p data-runtime data-start={SITE.startDate}>本站已运行 -- 天</p>
+    <p>本站总访问量 <span id="busuanzi_value_site_pv">--</span> 次 · 访客 <span id="busuanzi_value_site_uv">--</span> 人</p>
+    <p class="footer-small">用 <a href="https://astro.build" target="_blank" rel="noopener">Astro</a> 搭建 · 托管于 <a href="https://vercel.com" target="_blank" rel="noopener">Vercel</a> · <a href="/rss.xml">RSS 订阅</a></p>
+  </div>
+</footer>
+
+<script>
+  const el = document.querySelector<HTMLElement>('[data-runtime]')!;
+  const start = new Date(`${el.dataset.start}T00:00:00+08:00`).getTime();
+  const tick = () => {
+    let s = Math.max(0, Math.floor((Date.now() - start) / 1000));
+    const d = Math.floor(s / 86400); s %= 86400;
+    const h = Math.floor(s / 3600); s %= 3600;
+    const m = Math.floor(s / 60); s %= 60;
+    el.textContent = `本站已运行 ${d} 天 ${h} 时 ${m} 分 ${s} 秒`;
+  };
+  tick();
+  setInterval(tick, 1000);
+</script>

@@ -1,0 +1,137 @@
+---
+import Icon from './Icon.astro';
+import SocialLinks from './SocialLinks.astro';
+import { SITE, CATEGORIES } from '../site.config';
+import { categoryUrl, getPosts, tagCounts } from '../lib/posts';
+
+const posts = await getPosts();
+const tagTotal = tagCounts(posts).length;
+const path = Astro.url.pathname;
+const active = (prefix: string) => (prefix === '/' ? path === '/' : path.startsWith(prefix));
+
+const more = [
+  { href: '/tags/', label: '标签', icon: 'tag' },
+  { href: '/about/', label: '关于我', icon: 'user' },
+  { href: '/rss.xml', label: 'RSS 订阅', icon: 'rss' },
+];
+const pages = [
+  { href: '/album/', label: '相册', icon: 'image' },
+  { href: '/talk/', label: '说说', icon: 'talk' },
+  { href: '/links/', label: '友链', icon: 'friends' },
+  { href: '/message/', label: '留言', icon: 'message' },
+];
+---
+
+<nav class="nav" data-nav aria-label="主导航">
+  <div class="nav-inner">
+    <a class="nav-brand" href="/">{SITE.title}</a>
+    <div class="nav-menu">
+      <button class="nav-search" type="button" data-search-open aria-label="搜索（Ctrl + K）"><Icon name="search" size={20} /></button>
+      <a class="nav-item" href="/" aria-current={active('/') ? 'page' : undefined}><Icon name="home" size={17} /><span>主页</span></a>
+      <a class="nav-item" href="/archive/" aria-current={active('/archive/') ? 'page' : undefined}><Icon name="timeline" size={17} /><span>时间轴</span></a>
+      <div class="nav-dropdown">
+        <button class="nav-item" type="button" aria-haspopup="true" aria-current={more.some((m) => active(m.href)) ? 'page' : undefined}>
+          <Icon name="grid" size={17} /><span>更多</span>
+        </button>
+        <ul class="dropdown-list">
+          {more.map((m) => <li><a href={m.href}><Icon name={m.icon} size={15} /> {m.label}</a></li>)}
+        </ul>
+      </div>
+      <div class="nav-dropdown">
+        <button class="nav-item" type="button" aria-haspopup="true" aria-current={active('/category/') ? 'page' : undefined}>
+          <Icon name="list" size={17} /><span>分类</span>
+        </button>
+        <ul class="dropdown-list">
+          {CATEGORIES.map((c) => <li><a href={categoryUrl(c.id)}><Icon name="folder" size={15} /> {c.name}</a></li>)}
+        </ul>
+      </div>
+      {pages.map((p) => (
+        <a class="nav-item" href={p.href} aria-current={active(p.href) ? 'page' : undefined}><Icon name={p.icon} size={17} /><span>{p.label}</span></a>
+      ))}
+      <button class="theme-switch" type="button" role="switch" aria-checked="false" aria-label="深色模式" data-theme-toggle>
+        <span class="switch-knob"></span>
+        <span class="switch-icon sun"><Icon name="sun" size={12} /></span>
+        <span class="switch-icon moon"><Icon name="moon" size={12} /></span>
+      </button>
+    </div>
+    <div class="nav-mobile">
+      <button class="nav-icon" type="button" data-search-open aria-label="搜索"><Icon name="search" size={20} /></button>
+      <button class="nav-icon" type="button" data-drawer-open aria-label="打开菜单" aria-controls="drawer" aria-expanded="false"><Icon name="menu" size={20} /></button>
+    </div>
+  </div>
+</nav>
+
+<!-- Mobile side drawer -->
+<div class="drawer-mask" data-drawer-close hidden></div>
+<aside class="drawer" id="drawer" aria-label="菜单" data-drawer>
+  <div class="drawer-author">
+    <img src={SITE.avatar} width="90" height="90" alt="" />
+    <div class="author-stats">
+      <a href="/archive/"><span>文章</span><strong>{posts.length}</strong></a>
+      <a href="/tags/"><span>标签</span><strong>{tagTotal}</strong></a>
+      <a href={categoryUrl(CATEGORIES[0].id)}><span>分类</span><strong>{CATEGORIES.length}</strong></a>
+    </div>
+  </div>
+  <ul class="drawer-menu">
+    <li><a href="/"><Icon name="home" /> 主页</a></li>
+    <li><a href="/archive/"><Icon name="timeline" /> 时间轴</a></li>
+    {CATEGORIES.map((c) => <li><a href={categoryUrl(c.id)}><Icon name="folder" /> {c.name}</a></li>)}
+    {pages.map((p) => <li><a href={p.href}><Icon name={p.icon} /> {p.label}</a></li>)}
+    {more.map((m) => <li><a href={m.href}><Icon name={m.icon} /> {m.label}</a></li>)}
+  </ul>
+  <SocialLinks />
+</aside>
+
+<script>
+  const nav = document.querySelector<HTMLElement>('[data-nav]')!;
+  let lastY = scrollY;
+
+  // Transparent over the banner; solid once scrolled. Hide while scrolling down, show when scrolling up.
+  const onScroll = () => {
+    const y = scrollY;
+    nav.classList.toggle('nav-fixed', y > 10);
+    nav.classList.toggle('nav-hidden', y > 300 && y > lastY && !document.body.classList.contains('drawer-open'));
+    lastY = y;
+  };
+  addEventListener('scroll', onScroll, { passive: true });
+  onScroll();
+
+  // Theme: every [data-theme-toggle] (nav switch, floating button) flips light/dark.
+  const root = document.documentElement;
+  const syncSwitches = () => {
+    document.querySelectorAll('[data-theme-toggle][role="switch"]').forEach((el) => {
+      el.setAttribute('aria-checked', String(root.dataset.theme === 'dark'));
+    });
+  };
+  const applyTheme = (theme: string) => {
+    root.dataset.theme = theme;
+    syncSwitches();
+    document.dispatchEvent(new CustomEvent('themechange', { detail: theme }));
+  };
+  document.querySelectorAll('[data-theme-toggle]').forEach((el) => el.addEventListener('click', () => {
+    const next = root.dataset.theme === 'dark' ? 'light' : 'dark';
+    try { localStorage.setItem('theme', next); } catch {}
+    applyTheme(next);
+  }));
+  // Follow the system setting until the reader picks a theme themselves.
+  matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e) => {
+    let stored = null;
+    try { stored = localStorage.getItem('theme'); } catch {}
+    if (!stored) applyTheme(e.matches ? 'dark' : 'light');
+  });
+  syncSwitches();
+
+  // Mobile drawer
+  const drawer = document.querySelector<HTMLElement>('[data-drawer]')!;
+  const mask = document.querySelector<HTMLElement>('.drawer-mask')!;
+  const opener = document.querySelector<HTMLButtonElement>('[data-drawer-open]')!;
+  const setDrawer = (open: boolean) => {
+    document.body.classList.toggle('drawer-open', open);
+    mask.hidden = !open;
+    opener.setAttribute('aria-expanded', String(open));
+  };
+  opener.addEventListener('click', () => setDrawer(true));
+  mask.addEventListener('click', () => setDrawer(false));
+  addEventListener('keydown', (e) => { if (e.key === 'Escape') setDrawer(false); });
+  drawer.addEventListener('click', (e) => { if ((e.target as HTMLElement).closest('a')) setDrawer(false); });
+</script>

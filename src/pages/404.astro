@@ -1,0 +1,20 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Banner from '../components/Banner.astro';
+---
+
+<BaseLayout title="页面走丢了">
+  <Banner slot="banner" title="404" />
+  <div class="layout layout-single">
+    <div class="layout-main">
+      <div class="card not-found">
+        <h2>这个页面走丢了 (｡•́︿•̀｡)</h2>
+        <p>链接可能有误，或者文章已经下线。试试搜索，或者回到首页看看。</p>
+        <div class="not-found-actions">
+          <a class="follow-button" href="/">返回首页</a>
+          <button class="follow-button ghost" type="button" data-search-open>搜索文章</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</BaseLayout>

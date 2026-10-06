@@ -1,0 +1,45 @@
+---
+import { getCollection, render } from 'astro:content';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Banner from '../components/Banner.astro';
+import Icon from '../components/Icon.astro';
+import { SITE } from '../site.config';
+
+const talks = (await getCollection('talks')).sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
+const rendered = await Promise.all(talks.map(async (t) => ({ talk: t, Content: (await render(t)).Content })));
+
+// Show times in Beijing time regardless of where the site is built.
+const fmt = new Intl.DateTimeFormat('zh-CN', {
+  timeZone: 'Asia/Shanghai', year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', hour12: false,
+});
+---
+
+<BaseLayout title="说说" description={`${SITE.author} 的碎碎念和日常动态。`}>
+  <Banner slot="banner" title="说说">
+    <p class="banner-subtitle">一些碎碎念，共 {talks.length} 条</p>
+  </Banner>
+  <div class="layout layout-single">
+    <div class="layout-main">
+      {rendered.map(({ talk, Content }) => (
+        <article class="card talk">
+          <img class="talk-avatar" src={SITE.avatar} width="46" height="46" alt="" />
+          <div class="talk-main">
+            <div class="talk-head">
+              <strong>{SITE.author}</strong>
+              <time datetime={talk.data.date.toISOString()}><Icon name="clock" size={13} /> {fmt.format(talk.data.date)}</time>
+            </div>
+            <div class="talk-content prose"><Content /></div>
+            {talk.data.images.length > 0 && (
+              <div class:list={['talk-images', `count-${Math.min(talk.data.images.length, 3)}`]}>
+                {talk.data.images.map((src) => <a href={src} target="_blank" rel="noopener"><img src={src} alt="" loading="lazy" /></a>)}
+              </div>
+            )}
+            {talk.data.tags.length > 0 && (
+              <div class="talk-tags">{talk.data.tags.map((t) => <span><Icon name="tag" size={12} /> {t}</span>)}</div>
+            )}
+          </div>
+        </article>
+      ))}
+    </div>
+  </div>
+</BaseLayout>

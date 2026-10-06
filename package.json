@@ -1,0 +1,21 @@
+{
+  "name": "lxx-coding-blog",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Lxx的日常：AI 应用开发、日常与感悟",
+  "scripts": {
+    "dev": "astro dev",
+    "build": "node --import ./scripts/fix-cpsync-windows.mjs ./node_modules/astro/bin/astro.mjs build",
+    "preview": "astro preview",
+    "admin:password": "node scripts/hash-password.mjs"
+  },
+  "dependencies": {
+    "@astrojs/rss": "^4.0.19",
+    "@astrojs/sitemap": "^3.7.4",
+    "@astrojs/vercel": "^11.0.12",
+    "astro": "^7.3.5",
+    "marked": "^18.1.0",
+    "yaml": "^2.9.1"
+  }
+}

@@ -1,0 +1,133 @@
+---
+import Icon from './Icon.astro';
+---
+
+<dialog class="search-dialog" aria-label="搜索文章" data-search>
+  <div class="search-panel">
+    <div class="search-bar">
+      <Icon name="search" size={20} />
+      <input type="search" placeholder="搜索文章、标签或内容…" autocomplete="off" spellcheck="false" aria-label="搜索关键词" aria-controls="search-results" data-search-input />
+      <button class="search-close" type="button" data-search-close>取消</button>
+    </div>
+    <div class="search-body">
+      <p class="search-hint" data-search-status>输入关键词开始搜索，支持标题、标签和正文。</p>
+      <ul class="search-results" id="search-results" role="listbox" data-search-results></ul>
+    </div>
+    <div class="search-footer" aria-hidden="true">
+      <span><kbd>↑</kbd><kbd>↓</kbd> 选择</span>
+      <span><kbd>Enter</kbd> 打开</span>
+      <span><kbd>Esc</kbd> 关闭</span>
+    </div>
+  </div>
+</dialog>
+
+<script>
+  type Entry = { title: string; description: string; url: string; category: string; tags: string[]; date: string; text: string };
+
+  const dialog = document.querySelector<HTMLDialogElement>('[data-search]')!;
+  const input = dialog.querySelector<HTMLInputElement>('[data-search-input]')!;
+  const list = dialog.querySelector<HTMLUListElement>('[data-search-results]')!;
+  const status = dialog.querySelector<HTMLParagraphElement>('[data-search-status]')!;
+  let index: Entry[] | null = null;
+  let active = 0;
+
+  const escapeHtml = (s: string) => s.replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]!);
+  const escapeRegExp = (s: string) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
+  const highlight = (text: string, terms: string[]) => {
+    const safe = escapeHtml(text);
+    if (!terms.length) return safe;
+    return safe.replace(new RegExp(`(${terms.map((t) => escapeRegExp(escapeHtml(t))).join('|')})`, 'gi'), '<mark>$1</mark>');
+  };
+
+  // Show the body text around the first hit so readers see why a post matched.
+  const snippet = (entry: Entry, terms: string[]) => {
+    const lower = entry.text.toLowerCase();
+    const at = Math.min(...terms.map((t) => lower.indexOf(t)).filter((i) => i >= 0));
+    if (!Number.isFinite(at)) return entry.description;
+    const start = Math.max(0, at - 24);
+    return (start > 0 ? '…' : '') + entry.text.slice(start, start + 90) + '…';
+  };
+
+  const loadIndex = async () => {
+    if (index) return index;
+    status.textContent = '正在加载索引…';
+    index = (await fetch('/search.json').then((r) => r.json())) as Entry[];
+    return index;
+  };
+
+  const select = (i: number) => {
+    const items = [...list.querySelectorAll<HTMLAnchorElement>('a')];
+    if (!items.length) return;
+    active = (i + items.length) % items.length;
+    items.forEach((a, n) => a.setAttribute('aria-selected', String(n === active)));
+    items[active].scrollIntoView({ block: 'nearest' });
+  };
+
+  const render = async () => {
+    const entries = await loadIndex();
+    const query = input.value.trim().toLowerCase();
+    const terms = query.split(/\s+/).filter(Boolean);
+    if (!terms.length) {
+      list.innerHTML = '';
+      status.textContent = '输入关键词开始搜索，支持标题、标签和正文。';
+      return;
+    }
+    const results = entries
+      .map((e) => {
+        const title = e.title.toLowerCase();
+        const meta = `${e.description} ${e.tags.join(' ')} ${e.category}`.toLowerCase();
+        const body = e.text.toLowerCase();
+        let score = 0;
+        for (const t of terms) {
+          if (title.includes(t)) score += 10;
+          else if (meta.includes(t)) score += 4;
+          else if (body.includes(t)) score += 1;
+          else return null;
+        }
+        return { e, score };
+      })
+      .filter((r): r is { e: Entry; score: number } => r !== null)
+      .sort((a, b) => b.score - a.score);
+
+    status.textContent = results.length ? `找到 ${results.length} 篇相关文章` : `没有找到与「${input.value.trim()}」相关的文章`;
+    list.innerHTML = results.map(({ e }) => `
+      <li>
+        <a href="${e.url}" role="option" aria-selected="false">
+          <span class="result-meta">${escapeHtml(e.category)} · ${e.date}</span>
+          <strong>${highlight(e.title, terms)}</strong>
+          <span class="result-snippet">${highlight(snippet(e, terms), terms)}</span>
+        </a>
+      </li>`).join('');
+    select(0);
+  };
+
+  const open = () => {
+    if (dialog.open) return;
+    dialog.showModal();
+    input.select();
+    loadIndex().then(render).catch(() => { status.textContent = '搜索索引加载失败，请稍后再试。'; });
+  };
+
+  document.querySelectorAll('[data-search-open]').forEach((b) => b.addEventListener('click', open));
+  dialog.querySelector('[data-search-close]')!.addEventListener('click', () => dialog.close());
+  dialog.addEventListener('click', (event) => { if (event.target === dialog) dialog.close(); });
+  input.addEventListener('input', render);
+
+  input.addEventListener('keydown', (event) => {
+    if (event.key === 'ArrowDown') { event.preventDefault(); select(active + 1); }
+    if (event.key === 'ArrowUp') { event.preventDefault(); select(active - 1); }
+    if (event.key === 'Enter') {
+      const target = list.querySelectorAll<HTMLAnchorElement>('a')[active];
+      if (target) location.href = target.href;
+    }
+  });
+
+  document.addEventListener('keydown', (event) => {
+    const typing = (event.target as HTMLElement).closest('input, textarea, [contenteditable]');
+    if ((event.key === 'k' && (event.metaKey || event.ctrlKey)) || (event.key === '/' && !typing)) {
+      event.preventDefault();
+      open();
+    }
+  });
+</script>

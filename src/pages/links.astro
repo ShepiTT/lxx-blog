@@ -1,0 +1,54 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Banner from '../components/Banner.astro';
+import Comments from '../components/Comments.astro';
+import Icon from '../components/Icon.astro';
+import { SITE } from '../site.config';
+import { FRIEND_LINKS } from '../data/links';
+
+const siteUrl = new URL('/', Astro.site).href;
+const avatarUrl = new URL(SITE.avatar, Astro.site).href;
+---
+
+<BaseLayout title="友链" description="朋友们的博客，欢迎交换友链。">
+  <Banner slot="banner" title="友链">
+    <p class="banner-subtitle">海内存知己，天涯若比邻</p>
+  </Banner>
+  <div class="layout layout-single">
+    <div class="layout-main">
+      <section class="card">
+        <h2 class="card-heading"><Icon name="friends" /> 小伙伴们</h2>
+        {FRIEND_LINKS.length ? (
+          <div class="link-grid">
+            {FRIEND_LINKS.map((f) => (
+              <a class="link-card" href={f.url} target="_blank" rel="noopener">
+                <img src={f.avatar} width="56" height="56" alt="" loading="lazy" />
+                <span><strong>{f.name}</strong><em>{f.description}</em></span>
+              </a>
+            ))}
+          </div>
+        ) : (
+          <p class="link-empty">友链位置虚位以待～ 欢迎交换友链，按下面的方式来申请吧！</p>
+        )}
+      </section>
+
+      <section class="card">
+        <h2 class="card-heading"><Icon name="link" /> 申请友链</h2>
+        <ol class="link-rules">
+          <li>先把本站加到你的友链里；</li>
+          <li>在下方评论区留下你的博客名称、网址、头像和一句话介绍；</li>
+          <li>我看到后会尽快添加，内容以原创、技术或生活分享为主的博客优先～</li>
+        </ol>
+        <p class="link-mine-title">本站信息：</p>
+        <ul class="link-mine">
+          <li><span>名称</span><code>{SITE.title}</code></li>
+          <li><span>网址</span><code>{siteUrl}</code></li>
+          <li><span>头像</span><code>{avatarUrl}</code></li>
+          <li><span>简介</span><code>{SITE.motto}</code></li>
+        </ul>
+      </section>
+
+      <div class="card"><Comments heading="申请留言" /></div>
+    </div>
+  </div>
+</BaseLayout>
