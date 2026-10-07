@@ -8,7 +8,7 @@ interface Props {
 const { labels = false } = Astro.props;
 ---
 
-<ul class:list={['social-links', { 'with-labels': labels }]}>
+<ul class:list={['social-links', { 'with-labels': labels }]} data-edit="site.socials" data-edit-label="编辑社交链接">
   {SOCIALS.map((s) => (
     <li>
       <a href={s.href} aria-label={labels ? undefined : s.name} target={s.href.startsWith('http') ? '_blank' : undefined} rel={s.href.startsWith('http') ? 'noopener' : undefined}>

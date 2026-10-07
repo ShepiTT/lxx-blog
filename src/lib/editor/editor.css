@@ -1,0 +1,115 @@
+/* On-page edit mode (only loaded for the logged-in admin). */
+html.editing [data-edit] {
+  outline: 2px dashed rgba(73, 177, 245, .85);
+  outline-offset: 3px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color .2s, outline-color .2s;
+}
+html.editing [data-edit]:hover { outline-color: var(--hover); background-color: rgba(73, 177, 245, .1); }
+html.editing .tag-orbit { pointer-events: none; }
+html.editing .tag-orbit a { pointer-events: none; }
+
+.ed-item-actions { display: none; }
+html.editing [data-post-id], html.editing [data-talk-id] { position: relative; }
+html.editing .ed-item-actions { position: absolute; top: 10px; right: 10px; z-index: 5; display: flex; gap: 6px; }
+.ed-removed { opacity: .3; pointer-events: none; filter: grayscale(1); }
+
+/* Floating toolbar */
+.ed-toolbar {
+  position: fixed; left: 50%; bottom: 20px; z-index: 150; transform: translateX(-50%);
+  display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 6px 10px;
+  max-width: calc(100vw - 24px); padding: 8px 14px; border-radius: 14px;
+  background: rgba(31, 45, 61, .94); color: #fff; font-size: 14px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, .3);
+  backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+}
+.ed-toolbar strong { color: #8fd0ff; }
+.ed-tip { color: rgba(255, 255, 255, .7); font-size: 13px; }
+.ed-toolbar button, .ed-toolbar a {
+  padding: 4px 12px; border: 0; border-radius: 8px; background: rgba(255, 255, 255, .12);
+  color: #fff; font-size: 13px; cursor: pointer; text-decoration: none;
+}
+.ed-toolbar button:hover, .ed-toolbar a:hover { background: var(--theme); color: #fff; }
+.ed-toolbar .ed-exit { background: rgba(255, 114, 66, .85); }
+
+/* Buttons */
+.ed-btn {
+  display: inline-flex; align-items: center; justify-content: center; height: 34px; padding: 0 14px;
+  border: 1px solid var(--line); border-radius: 8px; background: var(--card); color: var(--text-strong);
+  font-size: 14px; cursor: pointer; text-decoration: none; white-space: nowrap;
+}
+.ed-btn:hover { border-color: var(--theme); color: var(--theme); }
+.ed-btn.primary { border-color: var(--theme); background: var(--theme); color: #fff; }
+.ed-btn.primary:hover { border-color: var(--hover); background: var(--hover); color: #fff; }
+.ed-btn.primary:disabled { opacity: .6; cursor: wait; }
+.ed-btn.small { height: 28px; padding: 0 10px; font-size: 12px; box-shadow: 0 2px 8px rgba(0, 0, 0, .15); }
+.ed-btn.danger { color: #e05a5a; }
+.ed-btn.danger:hover { border-color: #e05a5a; background: #e05a5a; color: #fff; }
+.ed-icon-btn {
+  flex: none; width: 28px; height: 28px; border: 0; border-radius: 50%;
+  background: rgba(224, 90, 90, .12); color: #e05a5a; font-size: 18px; line-height: 1; cursor: pointer;
+}
+.ed-icon-btn:hover { background: #e05a5a; color: #fff; }
+
+/* Dialog */
+.ed-dialog {
+  width: min(520px, 100% - 24px); max-height: calc(100vh - 40px); padding: 0; overflow: hidden;
+  border: 0; border-radius: 14px; background: var(--card); color: var(--text);
+  box-shadow: 0 24px 70px rgba(0, 0, 0, .35);
+}
+.ed-dialog.wide { width: min(900px, 100% - 24px); }
+.ed-dialog::backdrop { background: rgba(0, 0, 0, .45); }
+.ed-dialog form { display: flex; flex-direction: column; max-height: calc(100vh - 40px); }
+.ed-dialog h2 { margin: 0; padding: 16px 22px; border-bottom: 1px solid var(--line); font-size: 17px; }
+.ed-body { flex: 1; overflow-y: auto; padding: 18px 22px; }
+.ed-actions { display: flex; justify-content: flex-end; gap: 10px; padding: 12px 22px; border-top: 1px solid var(--line); }
+.ed-error { margin: 0 22px 8px; padding: 8px 12px; border-radius: 8px; background: rgba(224, 90, 90, .1); color: #e05a5a; font-size: 14px; }
+.ed-hint, .ed-field small { margin: 6px 0 0; color: var(--text-2); font-size: 12px; }
+
+.ed-fields { display: flex; flex-direction: column; gap: 14px; }
+.ed-field { display: flex; flex-direction: column; gap: 6px; }
+.ed-field > span, .ed-label { display: block; margin-bottom: 6px; color: var(--text-2); font-size: 13px; }
+.ed-field > span { margin-bottom: 0; }
+.ed-dialog input, .ed-dialog select, .ed-dialog textarea {
+  width: 100%; min-width: 0; padding: 7px 11px; border: 1px solid var(--line); border-radius: 8px;
+  background: var(--bg); color: var(--text-strong); font: 14px/1.6 var(--font);
+}
+.ed-dialog input:focus, .ed-dialog select:focus, .ed-dialog textarea:focus { outline: 0; border-color: var(--theme); box-shadow: 0 0 0 3px var(--theme-soft); }
+.ed-dialog textarea { resize: vertical; }
+
+.ed-rows { display: flex; flex-direction: column; gap: 10px; margin-bottom: 12px; }
+.ed-row { display: flex; align-items: center; gap: 8px; }
+.ed-row select { width: 140px; flex: none; }
+.ed-row input { width: 160px; flex: none; }
+.ed-row .grow { flex: 1; width: auto; }
+.ed-card { display: flex; flex-direction: column; gap: 8px; padding: 12px; border: 1px solid var(--line); border-radius: 10px; }
+
+.ed-albums { display: flex; flex-direction: column; gap: 14px; margin-bottom: 12px; }
+.ed-album { display: flex; flex-direction: column; gap: 10px; padding: 14px; border: 1px solid var(--line); border-radius: 10px; }
+.ed-album > .ed-btn { align-self: flex-start; }
+.ed-photos { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 10px; }
+.ed-photo { position: relative; display: flex; flex-direction: column; gap: 6px; }
+.ed-photo img { width: 100%; aspect-ratio: 4 / 3; object-fit: cover; border-radius: 8px; }
+.ed-photo input { padding: 4px 8px; font-size: 12px; }
+.ed-photo .ed-icon-btn { position: absolute; top: -8px; right: -8px; background: #e05a5a; color: #fff; }
+
+.ed-split { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.ed-markdown { min-height: 50vh; font: 13px/1.8 var(--mono) !important; }
+.ed-preview { max-height: 56vh; overflow-y: auto; padding: 4px 12px; border: 1px dashed var(--line); border-radius: 8px; }
+
+/* Shared status toast (same markup as the admin pages). */
+.toast {
+  position: fixed; left: 50%; bottom: 90px; z-index: 200; transform: translateX(-50%);
+  padding: 10px 20px; border-radius: 10px; background: #1f2d3d; color: #fff; font-size: 14px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, .25);
+}
+.toast.error { background: #c0392b; }
+
+@media (max-width: 680px) {
+  .ed-row { flex-wrap: wrap; }
+  .ed-row select, .ed-row input { width: 100%; flex: 1 1 100%; }
+  .ed-split { grid-template-columns: 1fr; }
+  .ed-markdown { min-height: 35vh; }
+  .ed-tip { display: none; }
+}

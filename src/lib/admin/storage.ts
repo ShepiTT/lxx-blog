@@ -42,7 +42,10 @@ const githubStorage = (): Storage => {
       ...init,
       headers: { ...headers, ...(init.body ? { 'Content-Type': 'application/json' } : {}) },
     });
-    if (res.status === 404) return null;
+    if (res.status === 404) {
+      if (!init.method || init.method === 'GET') return null;
+      throw new StorageError('GitHub 找不到仓库或无权写入，请检查 GITHUB_REPO 和 GITHUB_TOKEN 的仓库权限。', 502);
+    }
     if (res.status === 409 || res.status === 422) throw new StorageError('文件已被其他地方修改过，请刷新后台后再保存。', 409);
     if (res.status === 401 || res.status === 403) throw new StorageError('GitHub 拒绝访问，请检查 GITHUB_TOKEN 是否有效、是否有这个仓库的读写权限。', 502);
     if (!res.ok) throw new StorageError(`GitHub 请求失败（${res.status}）`, 502);

@@ -13,7 +13,7 @@ const { image = SITE.heroImage, title, full = false } = Astro.props;
 ---
 
 <header class:list={['banner', { 'banner-full': full }]} data-parallax={full ? '' : undefined}>
-  <div class="banner-bg" style={`background-image: url('${image}')`} data-banner-bg></div>
+  <div class="banner-bg" style={`background-image: url('${image}')`} data-banner-bg data-hero-image={image === SITE.heroImage ? '' : undefined}></div>
   <div class="banner-shade" data-banner-shade></div>
   <div class="banner-content" data-banner-content>
     {title && <h1 class="banner-title">{title}</h1>}

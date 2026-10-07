@@ -2,7 +2,10 @@
 import BaseLayout from '../layouts/BaseLayout.astro';
 import Banner from '../components/Banner.astro';
 import Icon from '../components/Icon.astro';
-import { ALBUMS } from '../data/album';
+import albumJson from '../data/album.json';
+import type { Album } from '../lib/site-data';
+
+const ALBUMS = albumJson as Album[];
 
 const total = ALBUMS.reduce((n, a) => n + a.photos.length, 0);
 ---
@@ -12,7 +15,8 @@ const total = ALBUMS.reduce((n, a) => n + a.photos.length, 0);
     <p class="banner-subtitle">{ALBUMS.length} 个相册 · {total} 张照片</p>
   </Banner>
   <div class="layout layout-wide">
-    <div class="layout-main">
+    <div class="layout-main" data-edit="album" data-edit-label="管理相册">
+      {ALBUMS.length === 0 && <div class="card empty-state">还没有照片～</div>}
       {ALBUMS.map((album) => (
         <section class="card album">
           <h2 class="card-heading"><Icon name="image" /> {album.name}<span class="album-count">{album.photos.length} 张</span></h2>

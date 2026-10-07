@@ -40,7 +40,14 @@ const configured = authConfigured();
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ username: fd.get('username'), password: fd.get('password') }),
       });
-      if (res.ok) { location.href = '/admin/'; return; }
+      if (res.ok) {
+        // Lets blog pages know to offer edit mode (the session cookie itself is httpOnly).
+        try { localStorage.setItem('admin-hint', '1'); } catch {}
+        // Only follow same-site paths ("//host" or "/\host" would leave the site).
+        const next = new URLSearchParams(location.search).get('next') ?? '';
+        location.href = /^\/(?![/\\])/.test(next) ? next : '/admin/';
+        return;
+      }
       error.textContent = (await res.json()).error ?? '登录失败';
     } catch {
       error.textContent = '网络错误，请稍后再试';

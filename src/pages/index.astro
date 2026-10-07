@@ -17,8 +17,8 @@ const tags = tagCounts(posts);
   <Banner slot="banner" full>
     <div class="hero-stage">
       <TagSphere tags={tags} />
-      <h1 class="hero-title">{SITE.title}</h1>
-      <p class="hero-subtitle">
+      <h1 class="hero-title" data-edit="site.title">{SITE.title}</h1>
+      <p class="hero-subtitle" data-edit="site.typewriter" data-edit-label="编辑首屏标语">
         <span data-typewriter={JSON.stringify(SITE.typewriter)}>{SITE.typewriter[0]}</span><span class="typed-cursor" aria-hidden="true">|</span>
       </p>
     </div>
@@ -40,9 +40,10 @@ const tags = tagCounts(posts);
   // Type each slogan out, pause, delete it, then move on to the next one.
   const el = document.querySelector<HTMLElement>('[data-typewriter]');
   if (el && !matchMedia('(prefers-reduced-motion: reduce)').matches) {
-    const texts: string[] = JSON.parse(el.dataset.typewriter!);
     let t = 0, i = 0, deleting = false;
     const step = () => {
+      const texts: string[] = JSON.parse(el.dataset.typewriter!);
+      t %= texts.length;
       const text = texts[t];
       i += deleting ? -1 : 1;
       el.textContent = text.slice(0, i);

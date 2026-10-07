@@ -20,10 +20,10 @@ const maxCount = Math.max(1, ...tags.map((t) => t.count));
 
 <aside class="aside">
   <section class="card author-card">
-    <div class="author-banner" style={`--banner-image: url('${SITE.heroImage}')`}></div>
-    <img class="author-avatar" src={SITE.avatar} width="110" height="110" alt={`${SITE.author} 的头像`} />
-    <h2 class="author-name">{SITE.author}</h2>
-    <p class="author-motto">{SITE.motto}</p>
+    <div class="author-banner" style={`--banner-image: url('${SITE.heroImage}')`} data-hero-image></div>
+    <img class="author-avatar" src={SITE.avatar} width="110" height="110" alt={`${SITE.author} 的头像`} data-edit="site.avatar" />
+    <h2 class="author-name" data-edit="site.author">{SITE.author}</h2>
+    <p class="author-motto" data-edit="site.motto">{SITE.motto}</p>
     <div class="author-stats">
       <a href="/archive/"><span>文章</span><strong>{posts.length}</strong></a>
       <a href="/tags/"><span>标签</span><strong>{tags.length}</strong></a>
@@ -57,7 +57,7 @@ const maxCount = Math.max(1, ...tags.map((t) => t.count));
     <>
       <section class="card">
         <h2 class="card-heading"><Icon name="bell" /> 公告</h2>
-        <p class="notice-text">{SITE.notice}</p>
+        <p class="notice-text" data-edit="site.notice">{SITE.notice}</p>
       </section>
       <div class="aside-sticky">
         <section class="card">

@@ -4,8 +4,8 @@ import sitemap from '@astrojs/sitemap';
 import vercel from '@astrojs/vercel';
 
 export default defineConfig({
-  // TODO：换成正式域名后，RSS、sitemap 和分享链接会自动跟着变
-  site: 'https://shepitt.vercel.app',
+  // 正式域名同时用于 RSS、sitemap 和分享链接。
+  site: 'https://lanjiangtao.cn',
   // The blog itself stays static; only /admin and /api/admin run on demand as Vercel functions.
   adapter: vercel(),
   integrations: [sitemap({ filter: (page) => !page.includes('/admin') })],

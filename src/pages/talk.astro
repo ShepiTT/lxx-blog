@@ -21,7 +21,7 @@ const fmt = new Intl.DateTimeFormat('zh-CN', {
   <div class="layout layout-single">
     <div class="layout-main">
       {rendered.map(({ talk, Content }) => (
-        <article class="card talk">
+        <article class="card talk" data-talk-id={talk.id}>
           <img class="talk-avatar" src={SITE.avatar} width="46" height="46" alt="" />
           <div class="talk-main">
             <div class="talk-head">

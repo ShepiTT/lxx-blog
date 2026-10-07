@@ -45,8 +45,8 @@ draft: false          # 设为 true 时只在本地预览中显示
 ## 发说说、加照片、加友链
 
 - **说说**：在 `src/content/talks/` 新建一个 `.md` 文件，开头写 `date`（如 `2026-10-10T20:30:00+08:00`），可选 `images`（配图路径列表）和 `tags`，下面写正文。
-- **相册**：照片放进 `public/album/`，在 `src/data/album.ts` 里登记（可以分多个相册，每张可写一句说明）。
-- **友链**：在 `src/data/links.ts` 的 `FRIEND_LINKS` 里加一行：名称、网址、头像、简介。
+- **相册**：编辑模式里在相册页上传；也可以把照片放进 `public/album/` 后在 `src/data/album.json` 里登记。
+- **友链**：编辑模式里在友链页添加；也可以改 `src/data/links.json`。
 - **留言板**：和文章评论一样用 Giscus，配好 `GISCUS` 后自动可用。
 
 ## 换成你自己的图片和信息
@@ -55,16 +55,25 @@ draft: false          # 设为 true 时只在本地预览中显示
 
 | 内容 | 怎么换 |
 | --- | --- |
-| 首屏大图（也用于侧边栏、页脚、各页面横幅） | 放进 `public/images/`，改 `src/site.config.ts` 里的 `heroImage`。建议 1920×1080 以上的横图 |
-| 头像（也是浏览器标签页图标） | 放进 `public/`，改 `avatar`。建议正方形 |
+| 首屏大图（也用于侧边栏、页脚、各页面横幅） | 放进 `public/images/`，在编辑模式里点「更换首屏图」，或改 `src/data/site.json` 的 `heroImage`。建议 1920×1080 以上的横图 |
+| 头像（也是浏览器标签页图标） | 编辑模式里点头像上传，或改 `src/data/site.json` 的 `avatar`。建议正方形 |
 | 文章封面 | 放进 `public/covers/`，改文章开头的 `cover` |
-| 标语、座右铭、公告、建站日期 | `src/site.config.ts` 的 `typewriter`、`motto`、`notice`、`startDate` |
-| 社交链接 | `src/site.config.ts` 的 `SOCIALS` |
+| 标语、座右铭、公告、建站日期、社交链接 | 编辑模式里直接改，或改 `src/data/site.json` |
 | 评论（Giscus） | 到 https://giscus.app/zh-CN 生成配置，填进 `GISCUS` |
-| 关于我的介绍 | `src/pages/about.astro`（TODO 注释处） |
+| 关于我的介绍 | 编辑模式里点介绍文字，或改 `src/data/about.md` |
 | 正式域名 | `astro.config.mjs` 的 `site` |
 
 访问量统计用的是 [vercount](https://vercount.one)（兼容不蒜子的第三方服务，不蒜子本身目前无法访问）。本地预览时显示的是所有 localhost 的总数，上线后才是你网站自己的数字。
+
+## 在网站上直接编辑
+
+登录后台后再打开博客，右下角会多一个铅笔按钮（访客看不到）。打开「编辑模式」后：
+
+- 带虚线框的内容点一下就能改：网站标题、作者名、座右铭、公告、首屏标语、建站日期、头像、社交链接；
+- 「关于我」页点介绍文字可以用 Markdown 修改；相册页可以新建相册、上传照片、改说明；友链页可以增删友链；
+- 文章卡片和说说上会出现「编辑 / 删除」，底部工具栏有「站点设置」「更换首屏图」「写文章」「发说说」。
+
+这些内容保存在 `src/data/` 里（`site.json`、`links.json`、`album.json`、`about.md`），也可以直接改文件。
 
 ## 后台管理（/admin）
 

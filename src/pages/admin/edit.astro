@@ -112,6 +112,7 @@ const heading = `${isNew ? (type === 'blog' ? '写文章' : '发说说') : type 
 <script>
   import { marked } from 'marked';
   import { toast } from '../../lib/admin/toast';
+  import { uploadImage } from '../../lib/admin/upload-client';
 
   const form = document.querySelector<HTMLFormElement>('[data-editor]')!;
   const initial = JSON.parse(form.dataset.initial!) as { type: 'blog' | 'talks'; isNew: boolean; id: string; sha: string; images: string[] };
@@ -135,39 +136,14 @@ const heading = `${isNew ? (type === 'blog' ? '写文章' : '发说说') : type 
   form.addEventListener('input', () => { dirty = true; });
   addEventListener('beforeunload', (e) => { if (dirty) e.preventDefault(); });
 
-  /** Shrinks photos to at most 1920px wide JPEG before upload; GIFs are sent as-is. */
-  async function prepare(file: File): Promise<{ name: string; blob: Blob }> {
-    if (file.type === 'image/gif') return { name: file.name, blob: file };
-    const bitmap = await createImageBitmap(file);
-    const scale = Math.min(1, 1920 / bitmap.width);
-    const canvas = document.createElement('canvas');
-    canvas.width = Math.round(bitmap.width * scale);
-    canvas.height = Math.round(bitmap.height * scale);
-    canvas.getContext('2d')!.drawImage(bitmap, 0, 0, canvas.width, canvas.height);
-    const blob = await new Promise<Blob>((resolve) => canvas.toBlob((b) => resolve(b!), 'image/jpeg', 0.85));
-    return { name: file.name.replace(/\.[^.]+$/, '') + '.jpg', blob };
-  }
-
   async function upload(file: File): Promise<string | null> {
     toast('图片上传中…');
     try {
-      const { name, blob } = await prepare(file);
-      const data = await new Promise<string>((resolve) => {
-        const reader = new FileReader();
-        reader.onload = () => resolve(String(reader.result).split(',')[1]);
-        reader.readAsDataURL(blob);
-      });
-      const res = await fetch('/api/admin/upload', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name, data }),
-      });
-      const out = await res.json();
-      if (!res.ok) throw new Error(out.error);
-      localPreviews.set(out.url, URL.createObjectURL(blob));
+      const { url, preview } = await uploadImage(file);
+      localPreviews.set(url, preview);
       toast('图片已上传');
       dirty = true;
-      return out.url;
+      return url;
     } catch (err) {
       toast((err as Error).message || '上传失败', true);
       return null;

@@ -3,6 +3,9 @@ import Icon from './Icon.astro';
 ---
 
 <div class="rightside" aria-label="快捷操作">
+  <button type="button" data-edit-toggle aria-label="编辑模式" title="编辑模式（仅你可见）" aria-pressed="false" hidden>
+    <Icon name="pencil" />
+  </button>
   <!-- Theme switching is wired up in Header.astro for every [data-theme-toggle]. -->
   <button type="button" data-theme-toggle aria-label="切换深色模式" title="切换深色模式">
     <span class="when-light"><Icon name="moon" /></span>

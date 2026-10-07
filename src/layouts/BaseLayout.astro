@@ -5,6 +5,7 @@ import Footer from '../components/Footer.astro';
 import Search from '../components/Search.astro';
 import Rightside from '../components/Rightside.astro';
 import Petals from '../components/Petals.astro';
+import EditMode from '../components/EditMode.astro';
 import { SITE } from '../site.config';
 
 interface Props {
@@ -62,5 +63,6 @@ const ogImage = new URL(image, Astro.site);
     <Rightside />
     <Petals />
     <Search />
+    <EditMode />
   </body>
 </html>

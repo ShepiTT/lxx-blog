@@ -582,6 +582,8 @@ body.drawer-open .drawer { transform: none; }
   cursor: pointer; opacity: .92; transition: background-color .3s, opacity .3s;
 }
 .rightside button:hover { background: var(--hover); opacity: 1; }
+.rightside button[hidden] { display: none; }
+.rightside [data-edit-toggle][aria-pressed="true"] { background: var(--hover); }
 .rightside [aria-pressed="false"] { background: #9aa5b1; }
 .rightside .to-top { display: none; }
 .rightside .to-top.show { display: grid; }

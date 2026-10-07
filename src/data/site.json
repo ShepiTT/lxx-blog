@@ -1,0 +1,42 @@
+{
+  "title": "Lxx的日常",
+  "author": "Lxx",
+  "description": "记录 AI 应用开发的探索，也记录日常与感悟。写给程序员，也写给对 AI 感兴趣的你。",
+  "motto": "和 AI 一起写代码，也认真生活。",
+  "typewriter": [
+    "相信记录的力量。",
+    "和 AI 一起写代码，也认真生活。",
+    "今天也在认真踩坑和填坑。"
+  ],
+  "notice": "欢迎来到我的小站！这里记录 AI 应用开发的探索，也有日常和感悟。读完有想法的话，欢迎在文章下面留言～",
+  "avatar": "/avatar.svg",
+  "heroImage": "/images/hero.jpg",
+  "startDate": "2026-10-06",
+  "socials": [
+    {
+      "name": "GitHub",
+      "href": "#",
+      "icon": "github"
+    },
+    {
+      "name": "X",
+      "href": "#",
+      "icon": "x"
+    },
+    {
+      "name": "公众号",
+      "href": "#",
+      "icon": "wechat"
+    },
+    {
+      "name": "邮箱",
+      "href": "#",
+      "icon": "mail"
+    },
+    {
+      "name": "RSS",
+      "href": "/rss.xml",
+      "icon": "rss"
+    }
+  ]
+}

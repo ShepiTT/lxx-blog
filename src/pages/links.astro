@@ -4,7 +4,10 @@ import Banner from '../components/Banner.astro';
 import Comments from '../components/Comments.astro';
 import Icon from '../components/Icon.astro';
 import { SITE } from '../site.config';
-import { FRIEND_LINKS } from '../data/links';
+import linksJson from '../data/links.json';
+import type { FriendLink } from '../lib/site-data';
+
+const FRIEND_LINKS = linksJson as FriendLink[];
 
 const siteUrl = new URL('/', Astro.site).href;
 const avatarUrl = new URL(SITE.avatar, Astro.site).href;
@@ -16,7 +19,7 @@ const avatarUrl = new URL(SITE.avatar, Astro.site).href;
   </Banner>
   <div class="layout layout-single">
     <div class="layout-main">
-      <section class="card">
+      <section class="card" data-edit="links" data-edit-label="管理友链">
         <h2 class="card-heading"><Icon name="friends" /> 小伙伴们</h2>
         {FRIEND_LINKS.length ? (
           <div class="link-grid">

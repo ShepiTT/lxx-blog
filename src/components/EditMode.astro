@@ -1,0 +1,12 @@
+---
+// Loads the on-page editor only for someone who has logged in to the admin on this browser.
+// Regular visitors download nothing extra: the editor module is a separate chunk.
+---
+
+<div class="toast" role="status" aria-live="polite" data-toast hidden></div>
+
+<script>
+  let hint: string | null = null;
+  try { hint = localStorage.getItem('admin-hint'); } catch {}
+  if (hint) import('../lib/editor/editor').then((m) => m.init());
+</script>

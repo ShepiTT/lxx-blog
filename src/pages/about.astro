@@ -5,6 +5,7 @@ import SocialLinks from '../components/SocialLinks.astro';
 import Icon from '../components/Icon.astro';
 import { SITE, CATEGORIES } from '../site.config';
 import { getPosts, categoryUrl } from '../lib/posts';
+import { Content as AboutContent } from '../data/about.md';
 
 const posts = await getPosts();
 const countOf = (id: string) => posts.filter((p) => p.data.category === id).length;
@@ -16,19 +17,17 @@ const countOf = (id: string) => posts.filter((p) => p.data.category === id).leng
     <div class="layout-main">
       <div class="card about-card">
         <div class="about-head">
-          <img class="author-avatar" src={SITE.avatar} width="120" height="120" alt={`${SITE.author} 的头像`} />
-          <h2>你好，我是 {SITE.author} 👋</h2>
-          <p>{SITE.motto}</p>
+          <img class="author-avatar" src={SITE.avatar} width="120" height="120" alt={`${SITE.author} 的头像`} data-edit="site.avatar" />
+          <h2>你好，我是 <span data-edit="site.author">{SITE.author}</span> 👋</h2>
+          <p data-edit="site.motto">{SITE.motto}</p>
           <SocialLinks />
         </div>
 
-        <!-- TODO：以下文字是示例，换成你自己的介绍 -->
-        <div class="prose">
-          <h2>关于我</h2>
-          <p>一名程序员，最近把大部分好奇心都放在了 AI 应用开发上。我喜欢把学到的东西动手做出来，再认真写下来——这个博客就是我的公开笔记本。</p>
-
-          <h2>我在写什么</h2>
+        <div class="prose" data-edit="about" data-edit-label="编辑介绍">
+          <AboutContent />
         </div>
+
+        <div class="prose"><h2>我在写什么</h2></div>
         <div class="topic-grid">
           {CATEGORIES.map((c) => (
             <a class="topic-card" href={categoryUrl(c.id)} data-cat={c.id}>
@@ -37,15 +36,6 @@ const countOf = (id: string) => posts.filter((p) => p.data.category === id).leng
               <em>{countOf(c.id)} 篇文章 <Icon name="chevron" size={14} /></em>
             </a>
           ))}
-        </div>
-
-        <div class="prose">
-          <h2>为什么写博客</h2>
-          <p>AI 工具和框架几乎每周都在变。与其被信息流推着走，不如自己动手试一遍，把真实的过程和结论记下来：哪些坑踩过了、哪些做法真的有用。</p>
-          <p>写作也是我整理思路的方式。很多时候我以为自己懂了，直到试着把它写清楚，才发现还有好多没想明白的地方。</p>
-
-          <h2>联系我</h2>
-          <p>交流技术、合作，或者只是打个招呼，都很欢迎。可以通过上面的社交链接找到我，也可以直接在任意文章下面留言。</p>
         </div>
       </div>
     </div>

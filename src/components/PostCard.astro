@@ -11,7 +11,7 @@ const { title, description, date, category, tags, cover } = post.data;
 const url = postUrl(post);
 ---
 
-<article class="post-card" data-cat={category}>
+<article class="post-card" data-cat={category} data-post-id={post.id} data-post-title={title}>
   <a class="post-cover" href={url} tabindex="-1" aria-hidden="true">
     <img src={cover} alt="" width="640" height="400" loading={eager ? 'eager' : 'lazy'} decoding="async" />
   </a>

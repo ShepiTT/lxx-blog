@@ -31,7 +31,7 @@ const fmtTalk = (iso: string) => iso.replace('T', ' ').slice(0, 16);
   <header class="admin-bar">
     <a class="admin-brand" href="/admin/">博客后台</a>
     <span class="admin-mode">{mode === 'local' ? '本地模式：直接保存到电脑上的项目文件' : mode === 'github' ? '在线模式：保存后约 1 分钟网站自动更新' : ''}</span>
-    <a class="admin-btn ghost" href="/" target="_blank">查看网站</a>
+    <a class="admin-btn ghost" href="/?edit=1">在网站上编辑</a>
     <button class="admin-btn ghost" type="button" data-logout>退出登录</button>
   </header>
 
@@ -91,6 +91,7 @@ const fmtTalk = (iso: string) => iso.replace('T', ' ').slice(0, 16);
 
   document.querySelector('[data-logout]')!.addEventListener('click', async () => {
     await fetch('/api/admin/logout', { method: 'POST' });
+    try { localStorage.removeItem('admin-hint'); sessionStorage.removeItem('edit-mode'); } catch {}
     location.href = '/admin/login/';
   });
 

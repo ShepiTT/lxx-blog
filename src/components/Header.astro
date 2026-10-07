@@ -24,7 +24,7 @@ const pages = [
 
 <nav class="nav" data-nav aria-label="主导航">
   <div class="nav-inner">
-    <a class="nav-brand" href="/">{SITE.title}</a>
+    <a class="nav-brand" href="/" data-edit="site.title">{SITE.title}</a>
     <div class="nav-menu">
       <button class="nav-search" type="button" data-search-open aria-label="搜索（Ctrl + K）"><Icon name="search" size={20} /></button>
       <a class="nav-item" href="/" aria-current={active('/') ? 'page' : undefined}><Icon name="home" size={17} /><span>主页</span></a>
