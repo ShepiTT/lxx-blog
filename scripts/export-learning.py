@@ -105,6 +105,36 @@ def code_span(text: str) -> str:
     return f"{delimiter}{padding}{text}{padding}{delimiter}"
 
 
+def historical_label_markup(markdown: str) -> str:
+    """Keep old bold labels readable when a colon directly touches the prose.
+
+    CommonMark cannot close ** after punctuation before a Chinese/Latin word.
+    Only the source field labels are replaced; code fences and all other text
+    remain byte-for-byte unchanged.
+    """
+    label = re.compile(
+        r"^\*\*((?:知识讲解|企业案例|食品制造案例|实际案例|案例|参考做法|标准做法|"
+        r"示例答案(?:\s*/\s*标准做法)?|可选练习|练习|参考答案|答案)\s*[:：])"
+        r"\*\*(?=[\u3400-\u9fffA-Za-z0-9])"
+    )
+    fence = None
+    result = []
+    for line in markdown.splitlines(keepends=True):
+        marker = re.match(r"^ {0,3}(`{3,}|~{3,})", line)
+        if marker:
+            sequence = marker.group(1)
+            if fence is None:
+                fence = sequence
+            elif sequence[0] == fence[0] and len(sequence) >= len(fence) and not line[marker.end():].strip():
+                fence = None
+            result.append(line)
+        elif fence is None:
+            result.append(label.sub(lambda match: f"<strong>{html.escape(match.group(1))}</strong>", line))
+        else:
+            result.append(line)
+    return "".join(result)
+
+
 class DocxReader:
     def __init__(self, archive: ZipFile):
         self.archive = archive
@@ -372,7 +402,7 @@ class DocxReader:
         return ("\n" if html_mode else "\n\n").join(rendered)
 
 
-def validate_issue(reader: DocxReader, selected):
+def validate_issue(reader: DocxReader, selected, historical=False):
     paragraphs = [node for block in selected for node in block.iter(w("p"))]
     points = []
     for index, paragraph in enumerate(paragraphs):
@@ -389,6 +419,10 @@ def validate_issue(reader: DocxReader, selected):
         "练习": r"^(?:可选练习|练习|练习题)\s*:\s*\S",
         "答案": r"^(?:参考答案|练习答案|答案)\s*:\s*\S",
     }
+    if historical:
+        # Recognize labels present in early editions without weakening daily exports.
+        labels["案例"] = r"^(?:食品制造案例|企业案例|实际案例|案例)\s*:\s*\S"
+        labels["标准做法或示例答案"] = r"^(?:示例答案\s*/\s*标准做法|标准做法|参考做法|示例答案|参考答案)\s*:\s*\S"
     for position, (number, start) in enumerate(points):
         end = points[position + 1][1] if position < 5 else len(paragraphs)
         values = [normalized(text_of(p)) for p in paragraphs[start + 1:end]]
@@ -402,7 +436,7 @@ def validate_issue(reader: DocxReader, selected):
             for _, start in points]
 
 
-def export(docx: Path, requested: str):
+def export(docx: Path, requested: str, historical=False):
     source_bytes = docx.read_bytes()
     source_hash = hashlib.sha256(source_bytes).hexdigest()
     with ZipFile(docx) as archive:
@@ -421,18 +455,41 @@ def export(docx: Path, requested: str):
         end = next((i for i, _ in issues if i > start), len(contents))
         selected = contents[start:end]
         reader.check_supported(selected)
-        topics = validate_issue(reader, selected)
+        topics = validate_issue(reader, selected, historical=historical)
         title = text_of(selected[0]).strip()
         paragraphs = [node for block in selected for node in block.iter(w("p"))]
         target = next((text_of(p).strip() for p in paragraphs[1:] if normalized(text_of(p)).startswith("本期目标:")), "")
-        if not target:
+        if target:
+            description = re.sub(r"^本期目标\s*[:：]\s*", "", target)
+        elif historical:
+            # Use only existing source prose for summaries; never invent an intro.
+            introductions = []
+            for paragraph in paragraphs[1:]:
+                value = text_of(paragraph).strip()
+                normalized_value = normalized(value)
+                if POINT_RE.match(normalized_value) and (
+                    normalized_value.startswith("知识点") or reader.heading_level(paragraph) is not None
+                ):
+                    break
+                if value and reader.heading_level(paragraph) is None:
+                    introductions.append(value)
+            if introductions:
+                description = introductions[0]
+            else:
+                explanation = next((text_of(p).strip() for p in paragraphs[1:]
+                                    if re.match(r"^(?:知识讲解|讲解)\s*[:：]\s*\S", text_of(p).strip())), "")
+                if not explanation:
+                    raise ExportError("历史期没有可直接引用的导语或知识讲解，停止生成文章摘要")
+                description = re.sub(r"^(?:知识讲解|讲解)\s*[:：]\s*", "", explanation)
+        else:
             raise ExportError("本期缺少明确的本期目标，停止生成文章摘要")
-        description = re.sub(r"^本期目标\s*[:：]\s*", "", target)
         description = description[:137] + "…" if len(description) > 138 else description
         cover = "/covers/ai-pair-programming.jpg"
         if not (Path(__file__).resolve().parents[1] / "public" / cover.lstrip("/")).is_file():
             raise ExportError(f"文章封面文件不存在：{cover}")
         body_markdown = reader.render_blocks(selected) + "\n"
+        if historical:
+            body_markdown = historical_label_markup(body_markdown)
         content_hash = hashlib.sha256(body_markdown.encode("utf-8")).hexdigest()
         meta = {
             "title": title,
@@ -463,12 +520,13 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--docx", type=Path, default=DEFAULT_DOCX)
     parser.add_argument("--date", required=True, help="北京时间日期，格式 YYYY-MM-DD")
+    parser.add_argument("--history", action="store_true", help="仅回填既有历史期：兼容旧标签，摘要直接引用原文导语或首段讲解")
     args = parser.parse_args()
     try:
         if not re.fullmatch(r"\d{4}-\d{2}-\d{2}", args.date):
             raise ExportError("--date 必须为 YYYY-MM-DD")
         requested = date.fromisoformat(args.date).isoformat()
-        result = export(args.docx, requested)
+        result = export(args.docx, requested, historical=args.history)
     except (ExportError, OSError, ValueError, BadZipFile, ET.ParseError, KeyError) as exc:
         print(f"export-learning: {exc}", file=sys.stderr)
         return 1

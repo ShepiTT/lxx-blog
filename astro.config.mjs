@@ -10,6 +10,8 @@ export default defineConfig({
   adapter: vercel(),
   integrations: [sitemap({ filter: (page) => !page.includes('/admin') })],
   markdown: {
+    // Preserve literal punctuation in the original lessons, including SQL examples.
+    smartypants: false,
     shikiConfig: {
       themes: { light: 'github-light', dark: 'github-dark' },
     },

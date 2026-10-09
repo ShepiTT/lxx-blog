@@ -39,6 +39,8 @@ node scripts/publish-learning.mjs --date 2026-10-09 --publish
 
 默认使用本机捆绑 Python 和原有 Word 手册路径，迁移电脑时可传入 `--python`、`--docx`。发布回执在忽略版本控制的 `output/learning-publication/`。网站后台发布后，本地仍需先 `git pull` 同步再继续修改。
 
+学习手册第 1–17 期已按原始日期（2026-09-18 至 2026-10-09）整理为每日文章。首页和时间轴按日期倒序显示；手册中没有内容的日期不补造文章。历史导出使用 `export-learning.py --history` 兼容早期字段名称，正文保持原文，摘要从原导语或讲解中摘取；日常发布仍使用默认严格校验。
+
 在 `src/content/blog/` 新建 `.md` 文件，文件名就是文章网址（`my-post.md` → `/posts/my-post/`）：
 
 ```markdown
