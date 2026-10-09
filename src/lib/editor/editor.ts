@@ -380,11 +380,19 @@ function setEditing(on: boolean) {
 }
 
 export async function init() {
+  const params = new URLSearchParams(location.search);
+  const requestedEditing = params.get('edit') === '1';
   document.head.append(h('style', { textContent: editorCss }));
   try {
     const res = await fetch('/api/admin/session');
     if (!res.ok) {
-      if (res.status === 401) forget();
+      if (res.status === 401) {
+        forget();
+        if (requestedEditing) {
+          const next = location.pathname + location.search + location.hash;
+          location.href = `/admin/login/?next=${encodeURIComponent(next)}`;
+        }
+      }
       return;
     }
     mode = (await res.json()).mode;
@@ -409,8 +417,7 @@ export async function init() {
     run(() => openEditor(target.dataset.edit!));
   }, true);
 
-  const params = new URLSearchParams(location.search);
-  let wanted = params.get('edit') === '1';
+  let wanted = requestedEditing;
   try { wanted ||= sessionStorage.getItem('edit-mode') === 'on'; } catch {}
   if (params.has('edit')) {
     params.delete('edit');

@@ -20,6 +20,7 @@ const fmt = new Intl.DateTimeFormat('zh-CN', {
   </Banner>
   <div class="layout layout-single">
     <div class="layout-main">
+      {talks.length === 0 && <div class="card empty-state">还没有说说。</div>}
       {rendered.map(({ talk, Content }) => (
         <article class="card talk" data-talk-id={talk.id}>
           <img class="talk-avatar" src={SITE.avatar} width="46" height="46" alt="" />

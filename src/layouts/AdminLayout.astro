@@ -2,11 +2,13 @@
 import '../styles/global.css';
 import '../styles/admin.css';
 import { SITE } from '../site.config';
+import { isLoggedIn } from '../lib/admin/auth';
 
 interface Props {
   title: string;
 }
 const { title } = Astro.props;
+const loggedIn = isLoggedIn(Astro.cookies);
 ---
 
 <!doctype html>
@@ -25,6 +27,9 @@ const { title } = Astro.props;
         document.documentElement.dataset.theme = dark ? 'dark' : 'light';
       })();
     </script>
+    {loggedIn && <script is:inline>
+      try { localStorage.setItem('admin-hint', '1'); } catch {}
+    </script>}
   </head>
   <body class="admin">
     <slot />

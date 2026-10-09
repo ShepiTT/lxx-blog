@@ -16,6 +16,7 @@ const size = (count: number) => Math.round(16 + ((count - 1) / Math.max(1, max -
     <div class="layout-main">
       <div class="card">
         <p class="timeline-total">标签 - {tags.length}</p>
+        {tags.length === 0 && <p class="empty-state">还没有标签，文章发布后会在这里汇总。</p>}
         <div class="tag-cloud-page">
           {tags.map(({ tag, count }, i) => (
             <a href={tagUrl(tag)} style={`color:${colors[i % colors.length]};font-size:${size(count)}px`}>{tag}<sup>{count}</sup></a>

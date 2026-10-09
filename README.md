@@ -26,6 +26,19 @@ npm run dev
 
 ## 写新文章
 
+### 每日学习自动发布
+
+每天北京时间 13:31 的「每日AI产品架构师学习手册」任务，在核验当期 Word 手册后，同步一篇完整文章到本网站。文章固定使用 `ai-learning-YYYY-MM-DD` 文件名；同一天重跑会核对已有内容，不会重复创建，也不会覆盖手工修改过的文章。
+
+发布器只读手册，通过已登录的 GitHub CLI 提交当天文章到 `ShepiTT/lxx-blog` 的 `main`，随后等待正式网页核验通过。它不会提交本地其他改动，也不需要后台密码。现有 Codex 定时任务在本机运行，需电脑开机、Codex 可运行及联网；已经发布的网页由 Vercel 提供访问。
+
+```powershell
+node scripts/publish-learning.mjs --date 2026-10-09 --dry-run
+node scripts/publish-learning.mjs --date 2026-10-09 --publish
+```
+
+默认使用本机捆绑 Python 和原有 Word 手册路径，迁移电脑时可传入 `--python`、`--docx`。发布回执在忽略版本控制的 `output/learning-publication/`。网站后台发布后，本地仍需先 `git pull` 同步再继续修改。
+
 在 `src/content/blog/` 新建 `.md` 文件，文件名就是文章网址（`my-post.md` → `/posts/my-post/`）：
 
 ```markdown

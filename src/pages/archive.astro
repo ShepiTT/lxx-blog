@@ -18,6 +18,7 @@ for (const post of posts) {
     <div class="layout-main">
       <div class="card timeline-card">
         <p class="timeline-total">文章总览 - {posts.length}</p>
+        {posts.length === 0 && <p class="empty-state">还没有文章，发布后会显示在这里。</p>}
         {[...years].map(([year, list]) => (
           <section class="timeline-year">
             <h2>{year}</h2>

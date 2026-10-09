@@ -28,6 +28,7 @@ const tags = tagCounts(posts);
   <div class="layout" id="posts">
     <div class="layout-main">
       <CategoryNav posts={posts} current="all" />
+      {posts.length === 0 && <div class="card empty-state">还没有文章，新的内容会在这里更新。</div>}
       <div class="post-list">
         {posts.map((post, i) => <PostCard post={post} eager={i === 0} />)}
       </div>

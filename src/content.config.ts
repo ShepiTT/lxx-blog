@@ -16,6 +16,7 @@ const blog = defineCollection({
     // 封面图放在 public/covers/ 下，这里写 /covers/文件名
     cover: z.string(),
     draft: z.boolean().default(false),
+    learningContentSha256: z.string().regex(/^[a-f0-9]{64}$/).optional(),
   }),
 });
 

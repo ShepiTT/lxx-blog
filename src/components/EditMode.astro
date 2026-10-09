@@ -1,5 +1,5 @@
 ---
-// Loads the on-page editor only for someone who has logged in to the admin on this browser.
+// Loads the on-page editor after a previous login or an explicit request to edit.
 // Regular visitors download nothing extra: the editor module is a separate chunk.
 ---
 
@@ -8,5 +8,6 @@
 <script>
   let hint: string | null = null;
   try { hint = localStorage.getItem('admin-hint'); } catch {}
-  if (hint) import('../lib/editor/editor').then((m) => m.init());
+  const requestedEditing = new URLSearchParams(location.search).get('edit') === '1';
+  if (hint || requestedEditing) import('../lib/editor/editor').then((m) => m.init());
 </script>

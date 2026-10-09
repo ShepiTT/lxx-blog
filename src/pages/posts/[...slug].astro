@@ -43,7 +43,7 @@ const url = new URL(postUrl(post), Astro.site).href;
 
   <div class="layout">
     <div class="layout-main">
-      <article class="card article">
+      <article class="card article" data-learning-sha256={post.data.learningContentSha256}>
         <div class="prose">
           <Content />
         </div>
