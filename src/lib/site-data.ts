@@ -21,12 +21,14 @@ export const siteSchema = z.object({
   heroImage: image,
   startDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, '日期格式应为 2026-10-06'),
   socials: z.array(z.object({ name: text(20).min(1), href, icon: z.enum(SOCIAL_ICONS) })).max(12),
-  // 首页个人介绍板块；text 里用空行分段。
+  // 「关于我」页的个人介绍；text 里用空行分段。
   intro: z.object({
     role: text(40),
     text: text(800),
+    stats: z.array(z.object({ value: text(12).min(1), label: text(16).min(1) })).max(4).optional(),
     skills: z.array(text(20).min(1)).max(16),
     now: z.array(text(60).min(1)).max(8),
+    hobbies: z.array(text(20).min(1)).max(8).optional(),
     email: z.string().trim().max(100).regex(/^$|^[^\s@]+@[^\s@]+\.[^\s@]+$/, '邮箱格式不正确'),
   }).optional(),
 });

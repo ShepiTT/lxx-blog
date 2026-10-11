@@ -315,6 +315,13 @@ body.drawer-open .drawer { transform: none; }
   display: inline-block; margin: 6px 0 0; padding: 2px 12px; border-radius: 20px;
   background: var(--theme-soft); color: var(--theme); font-size: 13px; font-weight: 600;
 }
+.intro-stats {
+  position: relative; display: grid; grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); gap: 12px;
+  margin: 0 0 20px; padding: 0; list-style: none;
+}
+.intro-stats li { padding: 12px 10px; border-radius: 12px; background: var(--bg); text-align: center; }
+.intro-stats strong { display: block; color: var(--theme); font-size: 22px; line-height: 1.35; }
+.intro-stats span { color: var(--text-2); font-size: 13px; }
 .intro-body { position: relative; display: grid; grid-template-columns: minmax(0, 1fr) 260px; gap: 22px; }
 .intro-text p { margin: 0 0 .6em; font-size: 15px; line-height: 1.85; }
 .intro-skills { display: flex; flex-wrap: wrap; gap: 8px; margin: 12px 0 0; padding: 0; list-style: none; }
@@ -327,6 +334,10 @@ body.drawer-open .drawer { transform: none; }
 .intro-now ul { margin: 0; padding: 0; list-style: none; }
 .intro-now li { position: relative; padding: 4px 0 4px 16px; font-size: 14px; line-height: 1.6; }
 .intro-now li::before { content: ""; position: absolute; left: 0; top: 13px; width: 7px; height: 7px; border-radius: 50%; background: var(--theme); }
+.intro-now ul + h3 { margin-top: 14px; }
+.intro-now .intro-hobbies { display: flex; flex-wrap: wrap; gap: 8px; }
+.intro-now .intro-hobbies li { padding: 3px 12px; border-radius: 20px; background: var(--card); }
+.intro-now .intro-hobbies li::before { content: none; }
 .intro-actions { position: relative; display: flex; flex-wrap: wrap; align-items: center; gap: 10px 18px; margin-top: 18px; }
 .intro-actions .follow-button { margin: 0; }
 .intro-email { color: var(--text-2); font-size: 13px; }
@@ -739,6 +750,10 @@ kbd { display: inline-block; min-width: 20px; margin-right: 3px; padding: 0 5px;
   .intro-avatar { width: 64px; height: 64px; }
   .intro-head h2 { font-size: 19px; }
   .intro-role { border-radius: 8px; line-height: 1.6; }
+  .intro-stats { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+  .intro-stats li { padding: 10px 4px; }
+  .intro-stats strong { font-size: 16px; }
+  .intro-stats span { font-size: 12px; }
   .intro-body { grid-template-columns: 1fr; gap: 14px; }
   .project-grid { grid-template-columns: 1fr; }
   .post-title { font-size: 19px; }

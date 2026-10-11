@@ -18,7 +18,7 @@ const loggedIn = isLoggedIn(Astro.cookies);
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="robots" content="noindex, nofollow" />
     <title>{title} | {SITE.title} 后台</title>
-    <link rel="icon" type="image/svg+xml" href={SITE.avatar} />
+    <link rel="icon" href={SITE.avatar} />
     <script is:inline>
       (() => {
         let stored = null;

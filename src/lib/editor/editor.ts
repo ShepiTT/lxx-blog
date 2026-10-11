@@ -8,7 +8,8 @@ import { uploadImage } from '../admin/upload-client';
 
 type FileName = 'site' | 'links' | 'album';
 interface Social { name: string; href: string; icon: string }
-interface Intro { role: string; text: string; skills: string[]; now: string[]; email: string }
+interface Stat { value: string; label: string }
+interface Intro { role: string; text: string; stats?: Stat[]; skills: string[]; now: string[]; hobbies?: string[]; email: string }
 interface Site {
   title: string; author: string; description: string; motto: string; typewriter: string[];
   notice: string; avatar: string; heroImage: string; startDate: string; socials: Social[]; intro?: Intro;
@@ -309,73 +310,56 @@ async function editAlbum() {
 // ---------- Home page introduction ----------
 const lines = (value: string) => value.split(/[\n,，]/).map((s) => s.trim()).filter(Boolean);
 
+// "4 年 | 接触 AI" per line → { value, label }.
+const parseStats = (value: string): Stat[] => value.split('\n').map((line) => {
+  const [v = '', ...rest] = line.split(/[|｜]/);
+  return { value: v.trim(), label: rest.join('|').trim() };
+}).filter((s) => s.value && s.label);
+
 function applyIntro(intro: Intro) {
   const card = document.querySelector<HTMLElement>('.intro-card');
-  if (!card) return;
+  const head = card?.querySelector<HTMLElement>('.intro-head');
+  if (!card || !head) return;
 
-  // Match IntroCard's conditional blocks without replacing its editable root.
-  const icon = (name: 'flower' | 'mail') => {
+  // Mirrors IntroCard.astro: keep the editable root and the avatar/greeting, rebuild the rest.
+  const icon = (name: 'flower' | 'sun' | 'mail') => {
     const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
     for (const [key, value] of Object.entries({ class: 'icon', width: '16', height: '16', viewBox: '0 0 24 24', fill: 'none', stroke: 'currentColor', 'stroke-width': '1.8', 'stroke-linecap': 'round', 'stroke-linejoin': 'round', 'aria-hidden': 'true' })) svg.setAttribute(key, value);
-    svg.innerHTML = name === 'mail'
-      ? '<rect x="3" y="5" width="18" height="14" rx="2.5"/><path d="m4 7 8 6 8-6"/>'
-      : '<circle cx="12" cy="12" r="2.2"/><path d="M12 9.8C9 6 10.5 3 12 3s3 3 0 6.8M14.1 11.3c3.7-2.6 6.7-1 6.7.6s-3.1 3-6.7.4M13.3 14.2c1.6 4.4-.6 6.9-2.2 6.4s-2-3.8.9-6.4M10.7 14.2c-3.9 2.4-6.6.4-6.3-1.2s3.6-2.6 6.3 1.2M9.9 11.3C5.5 10.6 4.8 7.3 6.2 6.4s4.2.4 3.7 4.9"/>';
+    svg.innerHTML = {
+      mail: '<rect x="3" y="5" width="18" height="14" rx="2.5"/><path d="m4 7 8 6 8-6"/>',
+      sun: '<circle cx="12" cy="12" r="4"/><path d="M12 2.5v2M12 19.5v2M2.5 12h2M19.5 12h2M5.3 5.3l1.4 1.4M17.3 17.3l1.4 1.4M5.3 18.7l1.4-1.4M17.3 6.7l1.4-1.4"/>',
+      flower: '<circle cx="12" cy="12" r="2.2"/><path d="M12 9.8C9 6 10.5 3 12 3s3 3 0 6.8M14.1 11.3c3.7-2.6 6.7-1 6.7.6s-3.1 3-6.7.4M13.3 14.2c1.6 4.4-.6 6.9-2.2 6.4s-2-3.8.9-6.4M10.7 14.2c-3.9 2.4-6.6.4-6.3-1.2s3.6-2.6 6.3 1.2M9.9 11.3C5.5 10.6 4.8 7.3 6.2 6.4s4.2.4 3.7 4.9"/>',
+    }[name];
     return svg;
   };
+  const list = (items: string[], props: Record<string, unknown> = {}) => h('ul', props, ...items.map((x) => h('li', {}, x)));
 
-  let role = card.querySelector('.intro-role');
-  if (intro.role) {
-    if (!role) {
-      role = h('p', { class: 'intro-role' });
-      card.querySelector('.intro-head > div')?.append(role);
-    }
-    role.textContent = intro.role;
-  } else role?.remove();
+  head.querySelector('.intro-role')?.remove();
+  if (intro.role) head.querySelector(':scope > div')?.append(h('p', { class: 'intro-role' }, intro.role));
 
-  const text = card.querySelector('.intro-text');
-  if (text) {
-    text.querySelectorAll('p').forEach((p) => p.remove());
-    const paragraphs = intro.text.split(/\n\s*\n/).map((p) => p.trim()).filter(Boolean);
-    text.prepend(...paragraphs.map((p) => h('p', {}, p)));
-    let skills = text.querySelector('.intro-skills');
-    if (intro.skills.length) {
-      if (!skills) {
-        skills = h('ul', { class: 'intro-skills', 'aria-label': '技能与关注领域' });
-        text.append(skills);
-      }
-      skills.replaceChildren(...intro.skills.map((x) => h('li', {}, x)));
-    } else skills?.remove();
-  }
+  const stats = intro.stats ?? [];
+  const hobbies = intro.hobbies ?? [];
+  const paragraphs = intro.text.split(/\n\s*\n/).map((p) => p.trim()).filter(Boolean);
+  const side = intro.now.length || hobbies.length
+    ? h('div', { class: 'intro-now' },
+      intro.now.length > 0 && h('h3', {}, icon('flower'), ' 现在在做'),
+      intro.now.length > 0 && list(intro.now),
+      hobbies.length > 0 && h('h3', {}, icon('sun'), ' 工作之外'),
+      hobbies.length > 0 && list(hobbies, { class: 'intro-hobbies' }))
+    : null;
 
-  let now = card.querySelector('.intro-now');
-  if (intro.now.length) {
-    if (!now) {
-      now = h('div', { class: 'intro-now' }, h('h3', {}, icon('flower'), ' 现在在做'), h('ul'));
-      card.querySelector('.intro-body')?.append(now);
-    }
-    now.querySelector('ul')?.replaceChildren(...intro.now.map((x) => h('li', {}, x)));
-  } else now?.remove();
-
-  const actions = card.querySelector('.intro-actions');
-  if (actions) {
-    let email = actions.querySelector('.intro-email');
-    let button = actions.querySelector<HTMLAnchorElement>('a[href^="mailto:"]');
-    if (intro.email) {
-      if (!button) {
-        button = h('a', { class: 'follow-button' }, icon('mail'), ' 发邮件给我');
-        actions.prepend(button);
-      }
-      button.href = `mailto:${intro.email}`;
-      if (!email) {
-        email = h('span', { class: 'intro-email' });
-        button.after(email);
-      }
-      email.textContent = intro.email;
-    } else {
-      button?.remove();
-      email?.remove();
-    }
-  }
+  card.replaceChildren(
+    head,
+    stats.length ? h('ul', { class: 'intro-stats' }, ...stats.map((s) => h('li', {}, h('strong', {}, s.value), h('span', {}, s.label)))) : '',
+    h('div', { class: 'intro-body' },
+      h('div', { class: 'intro-text' },
+        ...paragraphs.map((p) => h('p', {}, p)),
+        intro.skills.length > 0 && list(intro.skills, { class: 'intro-skills', 'aria-label': '技能与关注领域' })),
+      side),
+    h('div', { class: 'intro-actions' },
+      intro.email && h('a', { class: 'follow-button', href: `mailto:${intro.email}` }, icon('mail'), ' 发邮件给我'),
+      intro.email && h('span', { class: 'intro-email' }, intro.email)),
+  );
 }
 
 async function editIntro() {
@@ -383,16 +367,23 @@ async function editIntro() {
   const intro: Intro = site.intro ?? { role: '', text: '', skills: [], now: [], email: '' };
   const role = h('input', { value: intro.role, maxLength: 40, placeholder: '例如：AI 产品全栈开发 & 产品经理' });
   const text = h('textarea', { value: intro.text, rows: 7, maxLength: 800 });
+  const stats = h('textarea', { value: (intro.stats ?? []).map((s) => `${s.value} | ${s.label}`).join('\n'), rows: 3, placeholder: '4 年 | 接触 AI' });
   const skills = h('textarea', { value: intro.skills.join('\n'), rows: 4 });
   const now = h('textarea', { value: intro.now.join('\n'), rows: 4 });
+  const hobbies = h('textarea', { value: (intro.hobbies ?? []).join('\n'), rows: 2, placeholder: '📷 摄影' });
   const email = h('input', { type: 'email', value: intro.email, maxLength: 100, placeholder: 'name@example.com' });
   openDialog('编辑个人介绍', h('div', { class: 'ed-fields' },
     field('身份', role),
     field('个人介绍', text, '空一行就是新的一段'),
+    field('经历数字', stats, '每行一个，格式「数字 | 说明」，最多 4 个'),
     field('技能 / 关注领域', skills, '每行一个，也可以用逗号分隔'),
     field('现在在做', now, '每行一件事'),
+    field('工作之外', hobbies, '爱好，每行一个，也可以用逗号分隔'),
     field('联系邮箱', email, '留空就不显示「发邮件给我」按钮')), async () => {
-    site.intro = { role: role.value.trim(), text: text.value.trim(), skills: lines(skills.value), now: lines(now.value), email: email.value.trim() };
+    site.intro = {
+      role: role.value.trim(), text: text.value.trim(), stats: parseStats(stats.value),
+      skills: lines(skills.value), now: lines(now.value), hobbies: lines(hobbies.value), email: email.value.trim(),
+    };
     await save('site', site);
     applyIntro(site.intro);
     toast(savedMessage());
