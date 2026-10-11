@@ -187,6 +187,7 @@ async function changeImage(key: 'avatar' | 'heroImage') {
   if (key === 'avatar') {
     document.querySelectorAll<HTMLImageElement>('img[data-edit="site.avatar"], .talk-avatar, .drawer-author img').forEach((img) => { img.src = preview; });
   } else {
+    document.querySelectorAll('[data-hero-scene]').forEach((el) => el.remove()); // the animated default picture
     document.querySelectorAll<HTMLElement>('[data-hero-image], .footer').forEach((el) => {
       if (el.classList.contains('banner-bg')) el.style.backgroundImage = `url('${preview}')`;
       else el.style.setProperty('--banner-image', `url('${preview}')`);

@@ -2,6 +2,7 @@
 // Full-bleed illustrated header shared by every page; the home page uses the full-screen variant,
 // which also gets a scroll parallax: the image lags behind, darkens and blurs as you scroll past it.
 import Waves from './Waves.astro';
+import HeroScene from './HeroScene.astro';
 import { SITE } from '../site.config';
 
 interface Props {
@@ -10,10 +11,14 @@ interface Props {
   full?: boolean;
 }
 const { image = SITE.heroImage, title, full = false } = Astro.props;
+// The default illustration is drawn as an animated scene; any other picture stays a still image.
+const animated = image === '/images/hero.jpg';
 ---
 
 <header class:list={['banner', { 'banner-full': full }]} data-parallax={full ? '' : undefined}>
-  <div class="banner-bg" style={`background-image: url('${image}')`} data-banner-bg data-hero-image={image === SITE.heroImage ? '' : undefined}></div>
+  <div class="banner-bg" style={`background-image: url('${image}')`} data-banner-bg data-hero-image={image === SITE.heroImage ? '' : undefined}>
+    {animated && <HeroScene />}
+  </div>
   <div class="banner-shade" data-banner-shade></div>
   <div class="banner-content" data-banner-content>
     {title && <h1 class="banner-title">{title}</h1>}

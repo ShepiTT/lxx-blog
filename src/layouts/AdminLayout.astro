@@ -21,10 +21,12 @@ const loggedIn = isLoggedIn(Astro.cookies);
     <link rel="icon" href={SITE.avatar} />
     <script is:inline>
       (() => {
-        let stored = null;
-        try { stored = localStorage.getItem('theme'); } catch {}
-        const dark = stored ? stored === 'dark' : matchMedia('(prefers-color-scheme: dark)').matches;
-        document.documentElement.dataset.theme = dark ? 'dark' : 'light';
+        // 每次打开网站按北京时间决定：19:00 到次日 7:00 是夜间模式，其余时间白天。
+        // 这次浏览里手动切换过就沿用（只存在本标签页，关掉后重新按时间判断）。
+        let picked = null;
+        try { picked = sessionStorage.getItem('theme'); } catch {}
+        const hour = (new Date().getUTCHours() + 8) % 24; // 北京时间 UTC+8，没有夏令时
+        document.documentElement.dataset.theme = picked || (hour >= 19 || hour < 7 ? 'dark' : 'light');
       })();
     </script>
     {loggedIn && <script is:inline>

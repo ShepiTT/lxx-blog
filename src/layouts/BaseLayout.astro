@@ -43,10 +43,12 @@ const ogImage = new URL(image, Astro.site);
     <!-- Resolve the theme before first paint so dark mode never flashes white. -->
     <script is:inline>
       (() => {
-        let stored = null;
-        try { stored = localStorage.getItem('theme'); } catch {}
-        const dark = stored ? stored === 'dark' : matchMedia('(prefers-color-scheme: dark)').matches;
-        document.documentElement.dataset.theme = dark ? 'dark' : 'light';
+        // 每次打开网站按北京时间决定：19:00 到次日 7:00 是夜间模式，其余时间白天。
+        // 这次浏览里手动切换过就沿用（只存在本标签页，关掉后重新按时间判断）。
+        let picked = null;
+        try { picked = sessionStorage.getItem('theme'); } catch {}
+        const hour = (new Date().getUTCHours() + 8) % 24; // 北京时间 UTC+8，没有夏令时
+        document.documentElement.dataset.theme = picked || (hour >= 19 || hour < 7 ? 'dark' : 'light');
       })();
     </script>
     <!-- 访问统计：vercount（第三方服务，兼容不蒜子），数字会填进页脚、侧边栏和文章阅读量。

@@ -1,0 +1,360 @@
+---
+// Animated vector redraw of /images/hero.jpg (the default banner picture). Every moving part is
+// its own absolutely positioned layer animated with transform/opacity only, so the browser can run
+// the animations on the compositor instead of repainting the whole scene each frame.
+// Coordinates follow the original 1920×1080 picture; the frame is cropped like `background-size: cover`.
+// Colours come from CSS variables, so the dark theme turns the same scene into night (moon, stars,
+// a lit lighthouse sweeping its beam) with a slow fade instead of a jump.
+
+const pct = (v: number, of: number) => `${((v / of) * 100).toFixed(3)}%`;
+// Place a layer covering (x, y, w, h) of a parent box (the whole 1920×1080 frame by default).
+const box = (x: number, y: number, w: number, h: number, parent = [0, 0, 1920, 1080]) =>
+  `left:${pct(x - parent[0], parent[2])};top:${pct(y - parent[1], parent[3])};width:${pct(w, parent[2])};height:${pct(h, parent[3])}`;
+
+// Deterministic "random" so every build draws the same water and sky.
+let seed = 7;
+const rand = () => ((seed = (seed * 16807) % 2147483647) - 1) / 2147483646;
+
+// Glints on the water: shorter, thinner and denser towards the horizon.
+const glints = Array.from({ length: 120 }, () => {
+  const t = rand() ** 1.6;
+  const len = 14 + t * 80 + rand() * 30;
+  return { x: rand() * 1920 - len / 2, y: 608 + t * 465, len, w: 1.5 + t * 2.5, o: 0.25 + rand() * 0.4 };
+}).filter((g) => Math.abs(g.x + g.len / 2 - 1500) > 70); // keep the sun's column clear
+
+// The sun's (or moon's) reflection, a broken column of bright strokes under it.
+const reflection = Array.from({ length: 24 }, (_, i) => {
+  const t = i / 23;
+  const len = 92 - t * 52 + rand() * 18;
+  return { x: 1500 - len / 2 + (rand() - 0.5) * 16, y: 608 + t ** 1.25 * 462, len, w: 3 + t * 6 };
+});
+
+// Night sky: stars above the hills, kept clear of the moon.
+const stars = Array.from({ length: 90 }, () => ({ x: rand() * 1920, y: 12 + rand() ** 1.3 * 440, r: 0.8 + rand() ** 2.5 * 2.2 }))
+  .filter((s) => Math.hypot(s.x - 1500, s.y - 170) > 130);
+
+const clouds = [
+  { x: 160, y: 80, w: 260, h: 145, dx: '55%', dur: 46, delay: -12,
+    under: [285, 192, 122, 26], body: [290, 180, 108, 28], puffs: [[222, 166, 40], [272, 138, 52], [334, 160, 42], [374, 180, 28]] },
+  { x: 715, y: 40, w: 190, h: 110, dx: '-60%', dur: 38, delay: -20,
+    under: [808, 126, 88, 19], body: [810, 117, 80, 21], puffs: [[760, 108, 28], [798, 84, 37], [845, 100, 30], [874, 116, 20]] },
+  { x: 1065, y: 165, w: 235, h: 135, dx: '45%', dur: 52, delay: -8,
+    under: [1180, 266, 112, 26], body: [1186, 258, 104, 26], puffs: [[1126, 245, 40], [1168, 215, 48], [1225, 235, 40], [1262, 256, 26]] },
+  { x: 1660, y: 272, w: 168, h: 92, dx: '-55%', dur: 34, delay: -5,
+    under: [1742, 340, 78, 19], body: [1745, 333, 70, 18], puffs: [[1700, 328, 26], [1733, 305, 30], [1772, 320, 28], [1798, 336, 18]] },
+];
+
+// Gulls: a flock of three and a loner, each flock gliding across the sky while the wings flap.
+const FLOCK_BAND = [0, 110, 1920, 180];
+const flocks = [
+  { cls: 'flock', birds: [{ x: 640, y: 208, w: 40 }, { x: 593, y: 247, w: 28 }, { x: 684, y: 238, w: 32 }] },
+  { cls: 'flock flock-solo', birds: [{ x: 1276, y: 148, w: 36 }] },
+];
+const birdPath = (w: number) => `M${-w / 2} 0Q${-w / 4} ${-w / 3} 0 0Q${w / 4} ${-w / 3} ${w / 2} 0`;
+---
+
+<div class="hero-scene" aria-hidden="true" data-hero-scene>
+  <svg class="layer" style={box(0, 0, 1920, 1080)} viewBox="0 0 1920 1080" preserveAspectRatio="none">
+    <defs>
+      <linearGradient id="hs-sky" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" class="sky0" />
+        <stop offset=".5" class="sky1" />
+        <stop offset="1" class="sky2" />
+      </linearGradient>
+      <linearGradient id="hs-sea" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" class="sea0" />
+        <stop offset=".35" class="sea1" />
+        <stop offset=".7" class="sea2" />
+        <stop offset="1" class="sea3" />
+      </linearGradient>
+    </defs>
+    <rect width="1920" height="602" fill="url(#hs-sky)" />
+    <path class="hill-far" d="M0 602V578C70 540 110 515 190 515C250 515 280 480 350 478C430 476 520 505 600 530C660 550 710 570 730 575L760 602Z" />
+    <path class="hill-near" d="M120 604C180 575 260 560 330 552C390 548 430 558 470 560C510 565 540 590 560 604Z" />
+    <path class="hill-far" d="M1150 602C1200 575 1260 565 1350 555C1440 545 1530 520 1600 505C1660 495 1720 510 1780 530C1830 548 1880 565 1920 578V602Z" />
+    <path class="hill-near" d="M1420 604C1450 588 1490 575 1540 573C1590 571 1620 590 1640 604Z" />
+    <path class="tower" d="M1517 466H1543L1548 566H1512Z" />
+    <path class="tower-red" d="M1515.7 494H1544.3L1545.2 512H1514.8ZM1514 530H1546L1546.9 548H1513.1ZM1513 446L1530 428L1547 446Z" />
+    <rect class="lantern" x="1519" y="444" width="22" height="18" stroke="#3b3d46" stroke-width="3" />
+    <rect x="1510" y="461" width="40" height="6" rx="1" fill="#3b3d46" />
+    <rect y="600" width="1920" height="480" fill="url(#hs-sea)" />
+    <rect class="horizon" y="600" width="1920" height="5" opacity=".7" />
+  </svg>
+
+  <div class="phase day">
+    <div class="sky-body">
+      <div class="layer sun-glow" style={box(1120, -210, 760, 760)}></div>
+      <div class="layer sun" style={box(1430, 100, 140, 140)}></div>
+    </div>
+    <div class="layer lamp" style={box(1510, 433, 40, 40)}></div>
+  </div>
+
+  <div class="phase night">
+    {[0, 1, 2].map((n) => (
+      <svg class={`layer stars stars-${n}`} style={box(0, 0, 1920, 480)} viewBox="0 0 1920 480">
+        {stars.filter((_, i) => i % 3 === n).map((s) => <circle cx={s.x.toFixed(0)} cy={s.y.toFixed(0)} r={s.r.toFixed(1)} />)}
+      </svg>
+    ))}
+    <div class="layer meteor-track" style={box(260, 70, 620, 3)}><div class="meteor"></div></div>
+    <div class="sky-body">
+      <div class="layer moon-glow" style={box(1300, -30, 400, 400)}></div>
+      <div class="layer moon" style={box(1445, 115, 110, 110)}></div>
+    </div>
+    <div class="layer beam" style={box(1530, 392, 820, 120)}></div>
+    <div class="layer lamp-night" style={box(1470, 392, 120, 120)}></div>
+  </div>
+
+  {clouds.map((c) => (
+    <svg class="layer cloud" style={`${box(c.x, c.y, c.w, c.h)};--dx:${c.dx};animation-duration:${c.dur}s;animation-delay:${c.delay}s`} viewBox={`${c.x} ${c.y} ${c.w} ${c.h}`}>
+      <ellipse class="cloud-under" cx={c.under[0]} cy={c.under[1]} rx={c.under[2]} ry={c.under[3]} />
+      <ellipse cx={c.body[0]} cy={c.body[1]} rx={c.body[2]} ry={c.body[3]} />
+      {c.puffs.map(([cx, cy, r]) => <circle cx={cx} cy={cy} r={r} />)}
+    </svg>
+  ))}
+
+  {flocks.map((f) => (
+    <div class={`layer ${f.cls}`} style={box(...(FLOCK_BAND as [number, number, number, number]))}>
+      {f.birds.map((b, i) => (
+        <svg class="layer bird" style={`${box(b.x - b.w / 2, b.y - b.w / 4, b.w, b.w / 2, FLOCK_BAND)};animation-delay:${-i * 0.3}s`} viewBox={`${-b.w / 2} ${-b.w / 4} ${b.w} ${b.w / 2}`}>
+          <path d={birdPath(b.w)} fill="none" stroke="#2f3a48" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" />
+        </svg>
+      ))}
+    </div>
+  ))}
+
+  {[0, 1].map((n) => (
+    <svg class={`layer glints glints-${n}`} style={box(0, 600, 1920, 480)} viewBox="0 600 1920 480" preserveAspectRatio="none">
+      {glints.filter((_, i) => i % 2 === n).map((g) => (
+        <rect x={g.x.toFixed(1)} y={g.y.toFixed(1)} width={g.len.toFixed(1)} height={g.w.toFixed(1)} rx={(g.w / 2).toFixed(1)} opacity={g.o.toFixed(2)} />
+      ))}
+    </svg>
+  ))}
+
+  {[0, 1].map((n) => (
+    <svg class={`layer reflection reflection-${n}`} style={box(1380, 600, 240, 480)} viewBox="1380 600 240 480" preserveAspectRatio="none">
+      {reflection.filter((_, i) => i % 2 === n).map((r) => (
+        <rect x={r.x.toFixed(1)} y={r.y.toFixed(1)} width={r.len.toFixed(1)} height={r.w.toFixed(1)} rx={(r.w / 2).toFixed(1)} opacity=".6" />
+      ))}
+    </svg>
+  ))}
+
+  <div class="layer boat" style={box(770, 555, 110, 125)}>
+    <svg class="layer boat-shadow" viewBox="770 555 110 125">
+      <path d="M786 668H856L846 675H796Z" opacity=".45" />
+    </svg>
+    <svg class="layer boat-rock" viewBox="770 555 110 125">
+      <path class="sail-back" d="M818 576L786 640H818Z" />
+      <path class="sail" d="M823 568L869 643H823Z" />
+      <path class="mast" d="M820.5 562V652" stroke-width="4" />
+      <path class="hull" d="M780 650H860L849 664H791Z" />
+      <g class="boat-light">
+        <circle cx="853" cy="645" r="12" fill="#ffd970" opacity=".35" />
+        <circle cx="853" cy="645" r="4.5" fill="#ffe9a8" />
+      </g>
+    </svg>
+  </div>
+
+  <svg class="layer" style={box(0, 0, 1920, 1080)} viewBox="0 0 1920 1080" preserveAspectRatio="none">
+    <path class="grass" d="M0 738C80 724 220 718 330 740C370 750 395 762 405 772C300 752 150 750 0 765Z" />
+    <path class="rock" d="M0 765C150 750 300 752 405 772C470 810 520 920 560 1080H0ZM1580 1080C1610 1010 1680 960 1770 958C1840 958 1890 975 1920 990V1080Z" />
+    <path class="rock-line" d="M60 800C120 790 200 800 250 830" fill="none" stroke-width="5" stroke-linecap="round" />
+    <path class="rock-line-2" d="M1640 1010C1700 980 1770 975 1820 990" fill="none" stroke-width="4" stroke-linecap="round" />
+  </svg>
+</div>
+
+<style is:global>
+  /* Global (not scoped) so Astro doesn't stamp an attribute on every shape; all rules sit under .hero-scene.
+     The frame is 16:9 and always covers the banner, centred, like `background-size: cover`. */
+  .hero-scene {
+    --sky0: #4b9de0; --sky1: #9ccbef; --sky2: #e6f2fb;
+    --sea0: #66c5da; --sea1: #4aaccc; --sea2: #3592bd; --sea3: #2174a6; --horizon: #7fd0e2;
+    --hill-far: #8db5d6; --hill-near: #6b9dbf;
+    --tower: #fbf7f1; --tower-red: #e05a50; --lantern: #f8f1dc;
+    --cloud: #fff; --cloud-under: #dbe7f3;
+    --glint: #fff; --reflection: #effaf8;
+    --sail: #fbfaf7; --sail-back: #ece5da; --mast: #3a3a3f; --hull: #a45a3a; --boat-shadow: #2f7f9f;
+    --grass: #86b46c; --rock: #7f6b5b; --rock-line: #6b5849; --rock-line-2: #93806f;
+
+    position: absolute; left: 50%; top: 50%;
+    width: max(100cqw, 177.778cqh); aspect-ratio: 16 / 9;
+    transform: translate(-50%, -50%);
+    overflow: hidden; pointer-events: none;
+  }
+  :root[data-theme="dark"] .hero-scene {
+    --sky0: #060c20; --sky1: #13234d; --sky2: #2d4877;
+    --sea0: #24496c; --sea1: #1a3a5a; --sea2: #122c48; --sea3: #0b1f36; --horizon: #3d6690;
+    --hill-far: #23395c; --hill-near: #1a2c4a;
+    --tower: #b8bccb; --tower-red: #9a4440; --lantern: #fff2a8;
+    --cloud: #33436a; --cloud-under: #27345a;
+    --glint: #8fb0d6; --reflection: #e6eeff;
+    --sail: #a9aebf; --sail-back: #8d93a6; --mast: #15161c; --hull: #5a3628; --boat-shadow: #0d2238;
+    --grass: #2f4733; --rock: #352f2c; --rock-line: #262120; --rock-line-2: #4a413c;
+  }
+  .hero-scene svg * { transition: fill 1.6s ease, stroke 1.6s ease, stop-color 1.6s ease, opacity 1.6s ease; }
+  .hero-scene .sky0 { stop-color: var(--sky0); }
+  .hero-scene .sky1 { stop-color: var(--sky1); }
+  .hero-scene .sky2 { stop-color: var(--sky2); }
+  .hero-scene .sea0 { stop-color: var(--sea0); }
+  .hero-scene .sea1 { stop-color: var(--sea1); }
+  .hero-scene .sea2 { stop-color: var(--sea2); }
+  .hero-scene .sea3 { stop-color: var(--sea3); }
+  .hero-scene .horizon { fill: var(--horizon); }
+  .hero-scene .hill-far { fill: var(--hill-far); }
+  .hero-scene .hill-near { fill: var(--hill-near); }
+  .hero-scene .tower { fill: var(--tower); }
+  .hero-scene .tower-red { fill: var(--tower-red); }
+  .hero-scene .lantern { fill: var(--lantern); }
+  .hero-scene .cloud { fill: var(--cloud); }
+  .hero-scene .cloud-under { fill: var(--cloud-under); }
+  .hero-scene .glints { fill: var(--glint); }
+  .hero-scene .reflection { fill: var(--reflection); }
+  .hero-scene .sail { fill: var(--sail); }
+  .hero-scene .sail-back { fill: var(--sail-back); }
+  .hero-scene .mast { stroke: var(--mast); }
+  .hero-scene .hull { fill: var(--hull); }
+  .hero-scene .boat-shadow { fill: var(--boat-shadow); }
+  .hero-scene .grass { fill: var(--grass); }
+  .hero-scene .rock { fill: var(--rock); }
+  .hero-scene .rock-line { stroke: var(--rock-line); }
+  .hero-scene .rock-line-2 { stroke: var(--rock-line-2); }
+  .hero-scene .stars { fill: #fff; }
+
+  .hero-scene .layer { position: absolute; display: block; overflow: visible; }
+  .hero-scene .boat > .layer { inset: 0; width: 100%; height: 100%; }
+
+  /* Day ⇄ night: the sun sinks and fades while the moon rises, stars come out and the lighthouse lights up. */
+  .hero-scene .phase, .hero-scene .sky-body { position: absolute; inset: 0; transition: opacity 1.6s ease, transform 1.6s ease; }
+  .hero-scene .night, :root[data-theme="dark"] .hero-scene .day { opacity: 0; }
+  .hero-scene .night .sky-body, :root[data-theme="dark"] .hero-scene .day .sky-body { transform: translateY(7%); }
+  :root[data-theme="dark"] .hero-scene .night { opacity: 1; }
+  :root[data-theme="dark"] .hero-scene .night .sky-body { transform: none; }
+  .hero-scene .flock, .hero-scene .boat-light { transition: opacity 1.6s ease; }
+  .hero-scene .boat-light, :root[data-theme="dark"] .hero-scene .flock { opacity: 0; }
+  :root[data-theme="dark"] .hero-scene .boat-light { opacity: 1; }
+
+  .hero-scene .sun-glow {
+    border-radius: 50%;
+    background: radial-gradient(closest-side, rgba(255, 251, 228, .95), rgba(255, 247, 214, .6) 30%, rgba(255, 242, 205, .25) 62%, transparent);
+    animation: hs-glow 5s ease-in-out infinite alternate;
+  }
+  .hero-scene .sun {
+    border-radius: 50%;
+    background: radial-gradient(circle, #fffbe8 55%, #fbf1c8);
+    animation: hs-sun 5s ease-in-out infinite alternate;
+  }
+  .hero-scene .lamp {
+    border-radius: 50%;
+    background: radial-gradient(closest-side, rgba(255, 236, 150, .95), rgba(255, 220, 120, .35) 55%, transparent);
+    animation: hs-lamp 2.6s ease-in-out infinite;
+  }
+  .hero-scene .moon-glow {
+    border-radius: 50%;
+    background: radial-gradient(closest-side, rgba(214, 228, 255, .45), rgba(190, 210, 255, .16) 50%, transparent);
+    animation: hs-glow 6s ease-in-out infinite alternate;
+  }
+  .hero-scene .moon {
+    border-radius: 50%;
+    background: radial-gradient(circle at 35% 40%, #fffbea, #efe6c4);
+    -webkit-mask: radial-gradient(circle at 72% 32%, transparent 47%, #000 48%);
+    mask: radial-gradient(circle at 72% 32%, transparent 47%, #000 48%);
+  }
+  .hero-scene .stars-0 { animation: hs-twinkle 3s ease-in-out infinite; }
+  .hero-scene .stars-1 { animation: hs-twinkle 4.2s ease-in-out -1.5s infinite; }
+  .hero-scene .stars-2 { animation: hs-twinkle 5.4s ease-in-out -3s infinite; }
+  .hero-scene .meteor-track { transform: rotate(18deg); transform-origin: 0 50%; }
+  .hero-scene .meteor {
+    width: 22%; height: 100%; border-radius: 2px;
+    background: linear-gradient(to right, transparent, rgba(255, 255, 255, .9));
+    opacity: 0; animation: hs-meteor 11s ease-in 3s infinite;
+  }
+  /* A rotating beacon seen from the side: the beam swings right, through the viewer, to the left and
+     back, and the lamp flares each time it points straight at us (scaleX 0). */
+  .hero-scene .beam {
+    transform-origin: 0 50%;
+    clip-path: polygon(0 46%, 100% 0, 100% 100%, 0 54%);
+    background: linear-gradient(to right, rgba(255, 238, 170, .55), rgba(255, 238, 170, .18) 55%, transparent);
+    animation: hs-beam 8s infinite;
+  }
+  .hero-scene .lamp-night {
+    border-radius: 50%;
+    background: radial-gradient(closest-side, #fffbe0, rgba(255, 228, 130, .85) 18%, rgba(255, 214, 110, .3) 45%, transparent);
+    animation: hs-flare 4s ease-in-out infinite;
+  }
+  .hero-scene .cloud { animation: hs-drift 40s ease-in-out infinite alternate; }
+
+  /* Delays start each flock at its place in the original picture. */
+  .hero-scene .flock { animation: hs-fly 100s linear -33.3s infinite; }
+  .hero-scene .flock-solo { animation-name: hs-fly-solo; animation-duration: 120s; animation-delay: -75s; }
+  .hero-scene .bird { transform-origin: 50% 40%; animation: hs-flap .9s ease-in-out infinite; }
+
+  .hero-scene .glints-0 { animation: hs-shimmer 6s ease-in-out infinite; }
+  .hero-scene .glints-1 { animation: hs-shimmer 6s ease-in-out -3s infinite; --shift: 1.5%; }
+  .hero-scene .reflection { transform-origin: 50% 0; animation: hs-sparkle 3.4s ease-in-out infinite; }
+  .hero-scene .reflection-1 { animation-delay: -1.7s; }
+
+  .hero-scene .boat { animation: hs-sail 40s ease-in-out infinite alternate; }
+  .hero-scene .boat-rock { transform-origin: 50% 85%; animation: hs-rock 5s ease-in-out infinite; }
+  .hero-scene .boat-shadow { animation: hs-shadow 5s ease-in-out infinite; }
+
+  /* Don't animate what can't be seen: the hidden phase, or the whole scene once scrolled away. */
+  :root:not([data-theme="dark"]) .hero-scene .night *, :root[data-theme="dark"] .hero-scene .day *,
+  :root[data-theme="dark"] .hero-scene .flock, :root[data-theme="dark"] .hero-scene .bird,
+  .hero-scene.paused, .hero-scene.paused * { animation-play-state: paused; }
+  @media (prefers-reduced-motion: reduce) {
+    .hero-scene * { animation: none !important; }
+  }
+
+  @keyframes hs-glow { from { transform: scale(.92); opacity: .75; } to { transform: scale(1.06); opacity: 1; } }
+  @keyframes hs-sun { from { transform: scale(.98); } to { transform: scale(1.03); } }
+  @keyframes hs-lamp { 0%, 100% { opacity: .25; transform: scale(.7); } 50% { opacity: 1; transform: scale(1.1); } }
+  @keyframes hs-twinkle { 0%, 100% { opacity: 1; } 50% { opacity: .3; } }
+  @keyframes hs-meteor {
+    0% { transform: translateX(-100%); opacity: 0; }
+    2% { opacity: 1; }
+    9% { transform: translateX(420%); opacity: 0; }
+    100% { transform: translateX(420%); opacity: 0; }
+  }
+  @keyframes hs-beam {
+    0% { transform: scaleX(1); animation-timing-function: ease-in; }
+    25% { transform: scaleX(0); animation-timing-function: ease-out; }
+    50% { transform: scaleX(-1); animation-timing-function: ease-in; }
+    75% { transform: scaleX(0); animation-timing-function: ease-out; }
+    100% { transform: scaleX(1); }
+  }
+  @keyframes hs-flare { 0%, 100% { opacity: .55; transform: scale(.75); } 50% { opacity: 1; transform: scale(1.3); } }
+  @keyframes hs-drift { from { transform: translateX(0); } to { transform: translateX(var(--dx)); } }
+  @keyframes hs-fly {
+    0% { transform: translate(-40%, 0); }
+    25% { transform: translate(-10%, -8%); }
+    50% { transform: translate(20%, 4%); }
+    75% { transform: translate(50%, -6%); }
+    100% { transform: translate(80%, 0); }
+  }
+  @keyframes hs-fly-solo {
+    0% { transform: translate(-75%, 6%); }
+    50% { transform: translate(-15%, -6%); }
+    100% { transform: translate(45%, 4%); }
+  }
+  @keyframes hs-flap { 0%, 100% { transform: scaleY(1); } 50% { transform: scaleY(.3) translateY(18%); } }
+  @keyframes hs-shimmer {
+    0%, 100% { transform: translateX(0); opacity: 1; }
+    50% { transform: translateX(var(--shift, -1.5%)); opacity: .25; }
+  }
+  @keyframes hs-sparkle {
+    0%, 100% { transform: scaleX(1); opacity: 1; }
+    50% { transform: scaleX(.8); opacity: .45; }
+  }
+  @keyframes hs-sail { from { transform: translateX(-30%); } to { transform: translateX(110%); } }
+  @keyframes hs-rock {
+    0%, 100% { transform: translateY(0) rotate(-2deg); }
+    50% { transform: translateY(3%) rotate(2deg); }
+  }
+  @keyframes hs-shadow { 0%, 100% { transform: scaleX(1); opacity: 1; } 50% { transform: scaleX(.9); opacity: .6; } }
+</style>
+
+<script>
+  // Stop the animations while the banner is scrolled out of view.
+  document.querySelectorAll<HTMLElement>('[data-hero-scene]').forEach((scene) => {
+    new IntersectionObserver(([entry]) => scene.classList.toggle('paused', !entry.isIntersecting)).observe(scene.parentElement ?? scene);
+  });
+</script>
