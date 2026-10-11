@@ -13,8 +13,8 @@ const blog = defineCollection({
     date: z.coerce.date(),
     category: z.enum(categoryIds),
     tags: z.array(z.string()).default([]),
-    // 封面图放在 public/covers/ 下，这里写 /covers/文件名
-    cover: z.string(),
+    // 可选。不填就不显示图片（卡片左侧显示日期）；填写时放在 public/ 下，例如 /uploads/... 或 /covers/...
+    cover: z.string().optional(),
     draft: z.boolean().default(false),
     learningContentSha256: z.string().regex(/^[a-f0-9]{64}$/).optional(),
   }),

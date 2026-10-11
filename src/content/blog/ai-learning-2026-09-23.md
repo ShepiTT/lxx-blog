@@ -3,7 +3,6 @@ title: "第5期（2026-09-23）：把 AI 项目从想法推进到试点上线"
 description: "基线是上线前的真实情况，用来比较项目上线后是否改善。没有基线，就难以证明价值。"
 date: "2026-09-23"
 category: "ai"
-cover: "/covers/ai-pair-programming.jpg"
 tags: ["食品制造", "AI产品架构师", "每日学习"]
 learningContentSha256: "64006f286116d88c8fc8363a5a722be10403928b9e6c90929899fa7dcf45ef33"
 ---

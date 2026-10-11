@@ -267,6 +267,24 @@ body.drawer-open .drawer { transform: none; }
 .post-cover img { display: block; width: 100%; height: 100%; object-fit: cover; transition: transform .6s; }
 .post-card:hover .post-cover img { transform: scale(1.1); }
 .post-info { display: flex; flex-direction: column; justify-content: center; flex: 1; min-width: 0; padding: 0 36px; }
+
+/* Cards without a cover show a date block instead of a stock image. */
+.post-card.no-cover, .post-card.no-cover:nth-child(even) { flex-direction: row; height: auto; min-height: 170px; }
+.post-date {
+  position: relative; flex: none; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 5px;
+  width: 132px; color: var(--cat, var(--theme));
+  background: linear-gradient(160deg, color-mix(in srgb, var(--cat, var(--theme)) 16%, var(--card)), color-mix(in srgb, var(--cat, var(--theme)) 4%, var(--card)));
+  transition: background-color .3s;
+}
+.post-date::after {
+  content: ""; position: absolute; top: 20px; bottom: 20px; right: 0; width: 1px;
+  background: color-mix(in srgb, var(--cat, var(--theme)) 28%, transparent);
+}
+.post-date-day { font: 800 46px/1 Bahnschrift, "DIN Alternate", "Segoe UI", var(--font); letter-spacing: -1px; transition: transform .4s; }
+.post-date-month { font-size: 13px; font-weight: 600; letter-spacing: 1px; }
+.post-date-week { font-size: 12px; opacity: .7; }
+.post-card:hover .post-date-day { transform: translateY(-3px) scale(1.06); }
+.post-card.no-cover .post-info { padding: 24px 32px; }
 .post-title { margin: 0 0 6px; font-size: 21px; line-height: 1.45; font-weight: 600; }
 .post-title a:hover { color: var(--hover); }
 .post-meta { display: flex; flex-wrap: wrap; align-items: center; gap: 0 6px; color: var(--text-2); font-size: 13px; }
@@ -281,6 +299,51 @@ body.drawer-open .drawer { transform: none; }
 .post-read { display: inline-flex; align-items: center; gap: 4px; margin-top: 10px; color: var(--text-2); font-size: 12px; }
 
 .empty-state { padding: 48px 24px; text-align: center; color: var(--text-2); }
+
+/* Personal introduction above the home page list */
+.intro-card { position: relative; overflow: hidden; padding: 26px 30px; }
+.intro-card::before {
+  content: ""; position: absolute; top: -90px; right: -70px; width: 260px; height: 260px; border-radius: 50%;
+  background: radial-gradient(circle, color-mix(in srgb, var(--theme) 16%, transparent), transparent 70%);
+  pointer-events: none;
+}
+.intro-head { position: relative; display: flex; align-items: center; gap: 18px; margin-bottom: 14px; }
+.intro-avatar { flex: none; width: 84px; height: 84px; border: 3px solid var(--theme-soft); border-radius: 50%; transition: transform .6s; }
+.intro-card:hover .intro-avatar { transform: rotate(360deg); }
+.intro-head h2 { margin: 0; font-size: 22px; line-height: 1.4; }
+.intro-role {
+  display: inline-block; margin: 6px 0 0; padding: 2px 12px; border-radius: 20px;
+  background: var(--theme-soft); color: var(--theme); font-size: 13px; font-weight: 600;
+}
+.intro-body { position: relative; display: grid; grid-template-columns: minmax(0, 1fr) 260px; gap: 22px; }
+.intro-text p { margin: 0 0 .6em; font-size: 15px; line-height: 1.85; }
+.intro-skills { display: flex; flex-wrap: wrap; gap: 8px; margin: 12px 0 0; padding: 0; list-style: none; }
+.intro-skills li {
+  padding: 2px 12px; border-radius: 20px; font-size: 13px;
+  border: 1px solid color-mix(in srgb, var(--theme) 30%, transparent); color: var(--text-strong);
+}
+.intro-now { align-self: start; padding: 16px 18px; border-radius: 12px; background: var(--bg); }
+.intro-now h3 { display: flex; align-items: center; gap: 6px; margin: 0 0 8px; color: var(--hover); font-size: 15px; }
+.intro-now ul { margin: 0; padding: 0; list-style: none; }
+.intro-now li { position: relative; padding: 4px 0 4px 16px; font-size: 14px; line-height: 1.6; }
+.intro-now li::before { content: ""; position: absolute; left: 0; top: 13px; width: 7px; height: 7px; border-radius: 50%; background: var(--theme); }
+.intro-actions { position: relative; display: flex; flex-wrap: wrap; align-items: center; gap: 10px 18px; margin-top: 18px; }
+.intro-actions .follow-button { margin: 0; }
+.intro-email { color: var(--text-2); font-size: 13px; }
+
+/* Page numbers under the post list */
+.pagination { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 8px; }
+.page-num, .page-step {
+  display: inline-flex; align-items: center; justify-content: center; gap: 4px;
+  min-width: 38px; height: 38px; padding: 0 10px; border-radius: 10px;
+  background: var(--card); box-shadow: var(--shadow); color: var(--text); font-size: 14px;
+  transition: background-color .25s, color .25s, transform .25s;
+}
+.page-step { padding: 0 14px; }
+.page-prev { display: inline-flex; transform: rotate(180deg); }
+a.page-num:hover, a.page-step:hover { background: var(--theme); color: #fff; transform: translateY(-2px); }
+.page-num.current { background: var(--theme); color: #fff; font-weight: 600; }
+.page-gap { padding: 0 2px; color: var(--text-2); }
 
 /* ---------- Sidebar ---------- */
 .aside { display: flex; flex-direction: column; gap: 20px; min-width: 0; }
@@ -322,6 +385,12 @@ body.drawer-open .drawer { transform: none; }
 .recent-thumb { flex: none; width: 60px; height: 60px; overflow: hidden; border-radius: 6px; }
 .recent-thumb img { display: block; width: 100%; height: 100%; object-fit: cover; transition: transform .5s; }
 .recent-list li:hover .recent-thumb img { transform: scale(1.12); }
+.recent-date {
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px;
+  background: color-mix(in srgb, var(--cat, var(--theme)) 14%, var(--card)); color: var(--cat, var(--theme));
+}
+.recent-date strong { font: 800 22px/1 Bahnschrift, "DIN Alternate", "Segoe UI", var(--font); }
+.recent-date span { font-size: 11px; }
 .recent-list div { min-width: 0; }
 .recent-list div a {
   display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
@@ -469,11 +538,25 @@ body.drawer-open .drawer { transform: none; }
 .tag-cloud-page sup { margin-left: 2px; color: var(--text-2); font-size: 12px; }
 
 /* ---------- About & 404 ---------- */
-.about-card { padding: 36px 40px; }
-.about-head { margin-bottom: 20px; text-align: center; }
-.about-head .author-avatar { margin: 0 auto; width: 120px; height: 120px; border-color: var(--theme-soft); }
-.about-head h2 { margin: 14px 0 4px; font-size: 26px; }
-.about-head p { margin: 0 0 8px; color: var(--text-2); }
+.about-contact .social-links { justify-content: flex-start; }
+
+/* GitHub projects on the About page */
+.projects-head { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; }
+.project-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
+.project-card {
+  display: flex; flex-direction: column; gap: 6px; padding: 16px 18px;
+  border: 1px solid var(--line); border-radius: 10px; background: var(--card);
+  transition: border-color .25s, transform .25s, box-shadow .25s;
+}
+.project-card:hover { border-color: var(--theme); transform: translateY(-3px); box-shadow: var(--shadow-hover); }
+.project-name { display: flex; align-items: center; gap: 6px; color: var(--theme); font-size: 15px; word-break: break-all; }
+.project-desc {
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+  flex: 1; margin: 0; color: var(--text); font-size: 13px; line-height: 1.7;
+}
+.project-meta { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 14px; color: var(--text-2); font-size: 12px; }
+.project-meta span { display: inline-flex; align-items: center; gap: 4px; }
+.lang-dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; }
 .topic-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; margin: 0 0 1.4em; }
 .topic-card {
   display: flex; flex-direction: column; gap: 4px; padding: 16px 18px;
@@ -646,8 +729,20 @@ kbd { display: inline-block; min-width: 20px; margin-right: 3px; padding: 0 5px;
   .post-card, .post-card:nth-child(even) { flex-direction: column; height: auto; }
   .post-cover { width: 100%; height: 200px; }
   .post-info { padding: 18px 20px 22px; }
+  .post-card.no-cover, .post-card.no-cover:nth-child(even) { flex-direction: row; min-height: 0; }
+  .post-date { width: 80px; gap: 3px; }
+  .post-date-day { font-size: 30px; }
+  .post-date-month { font-size: 11px; letter-spacing: 0; }
+  .post-card.no-cover .post-info { padding: 16px 18px; }
+  .intro-card { padding: 20px 18px; }
+  .intro-head { gap: 14px; }
+  .intro-avatar { width: 64px; height: 64px; }
+  .intro-head h2 { font-size: 19px; }
+  .intro-role { border-radius: 8px; line-height: 1.6; }
+  .intro-body { grid-template-columns: 1fr; gap: 14px; }
+  .project-grid { grid-template-columns: 1fr; }
   .post-title { font-size: 19px; }
-  .article, .about-card { padding: 24px 18px; }
+  .article { padding: 24px 18px; }
   .prose pre { margin-inline: -18px; border-radius: 0; }
   .topic-grid { grid-template-columns: 1fr; }
   .pagination-post { grid-template-columns: 1fr; }

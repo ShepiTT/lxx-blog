@@ -1,8 +1,7 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
 import Banner from '../components/Banner.astro';
-import PostCard from '../components/PostCard.astro';
-import CategoryNav from '../components/CategoryNav.astro';
+import PostListBlock from '../components/PostListBlock.astro';
 import Sidebar from '../components/Sidebar.astro';
 import Icon from '../components/Icon.astro';
 import TagSphere from '../components/TagSphere.astro';
@@ -27,11 +26,7 @@ const tags = tagCounts(posts);
 
   <div class="layout" id="posts">
     <div class="layout-main">
-      <CategoryNav posts={posts} current="all" />
-      {posts.length === 0 && <div class="card empty-state">还没有文章，新的内容会在这里更新。</div>}
-      <div class="post-list">
-        {posts.map((post, i) => <PostCard post={post} eager={i === 0} />)}
-      </div>
+      <PostListBlock all={posts} posts={posts} page={1} base="/" firstAnchor="#posts" />
     </div>
     <Sidebar />
   </div>

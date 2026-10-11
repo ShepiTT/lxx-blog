@@ -3,7 +3,6 @@ title: "第7期（2026-09-25）：把AI能力接入企业系统架构"
 description: "架构图要说明组件、数据流和责任边界，而不只是列技术名词。一个常见结构包括交互层、业务/API层、AI编排层，以及数据和模型基础设施。请求先经过业务服务做身份与范围校验，再由AI编排服务完成检索或模型调用；结果返回业务服务核验，必要时由员工确认后才写入正式系统。"
 date: "2026-09-25"
 category: "ai"
-cover: "/covers/ai-pair-programming.jpg"
 tags: ["食品制造", "AI产品架构师", "每日学习"]
 learningContentSha256: "df1a64bd37ca4e682d770d557c24af043a374a7c729bc4d2ae617bde81af251c"
 ---

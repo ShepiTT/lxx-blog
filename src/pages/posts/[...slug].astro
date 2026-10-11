@@ -64,12 +64,12 @@ const url = new URL(postUrl(post), Astro.site).href;
 
       <nav class="pagination-post" aria-label="上一篇和下一篇">
         {newer && (
-          <a class="pager" href={postUrl(newer)} style={`--pager-image: url('${newer.data.cover}')`}>
+          <a class="pager" href={postUrl(newer)} style={`--pager-image: url('${newer.data.cover ?? SITE.heroImage}')`}>
             <span>上一篇</span><strong>{newer.data.title}</strong>
           </a>
         )}
         {older && (
-          <a class="pager pager-next" href={postUrl(older)} style={`--pager-image: url('${older.data.cover}')`}>
+          <a class="pager pager-next" href={postUrl(older)} style={`--pager-image: url('${older.data.cover ?? SITE.heroImage}')`}>
             <span>下一篇</span><strong>{older.data.title}</strong>
           </a>
         )}

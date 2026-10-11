@@ -75,7 +75,7 @@ const heading = `${isNew ? (type === 'blog' ? '写文章' : '发说说') : type 
           <label>标签（用逗号分隔）<input name="tags" value={list(data.tags).join(', ')} placeholder="RAG, LLM" /></label>
           <label class="span-2">摘要（显示在文章卡片上）<textarea name="description" rows="2" required maxlength="200">{String(data.description ?? '')}</textarea></label>
           <div class="span-2 cover-field">
-            <span>封面图</span>
+            <span>封面图（可选，不填就不显示图片）</span>
             <div class="cover-row">
               <img data-cover-preview src={String(data.cover ?? '') || undefined} alt="" hidden={!data.cover} />
               <input name="cover" value={String(data.cover ?? '')} placeholder="/uploads/... 或 /covers/..." />

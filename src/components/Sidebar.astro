@@ -46,7 +46,13 @@ const maxCount = Math.max(1, ...tags.map((t) => t.count));
         <ul class="recent-list">
           {recent.map((p) => (
             <li>
-              <a class="recent-thumb" href={postUrl(p)} tabindex="-1" aria-hidden="true"><img src={p.data.cover} alt="" width="64" height="64" loading="lazy" /></a>
+              {p.data.cover ? (
+                <a class="recent-thumb" href={postUrl(p)} tabindex="-1" aria-hidden="true"><img src={p.data.cover} alt="" width="64" height="64" loading="lazy" /></a>
+              ) : (
+                <a class="recent-thumb recent-date" href={postUrl(p)} tabindex="-1" aria-hidden="true" data-cat={p.data.category}>
+                  <strong>{p.data.date.getUTCDate()}</strong><span>{p.data.date.getUTCMonth() + 1} 月</span>
+                </a>
+              )}
               <div><a href={postUrl(p)}>{p.data.title}</a><time datetime={isoDate(p.data.date)}>{isoDate(p.data.date)}</time></div>
             </li>
           ))}
@@ -65,7 +71,13 @@ const maxCount = Math.max(1, ...tags.map((t) => t.count));
           <ul class="recent-list">
             {recent.map((p) => (
               <li>
+                {p.data.cover ? (
                 <a class="recent-thumb" href={postUrl(p)} tabindex="-1" aria-hidden="true"><img src={p.data.cover} alt="" width="64" height="64" loading="lazy" /></a>
+              ) : (
+                <a class="recent-thumb recent-date" href={postUrl(p)} tabindex="-1" aria-hidden="true" data-cat={p.data.category}>
+                  <strong>{p.data.date.getUTCDate()}</strong><span>{p.data.date.getUTCMonth() + 1} 月</span>
+                </a>
+              )}
                 <div><a href={postUrl(p)}>{p.data.title}</a><time datetime={isoDate(p.data.date)}>{isoDate(p.data.date)}</time></div>
               </li>
             ))}

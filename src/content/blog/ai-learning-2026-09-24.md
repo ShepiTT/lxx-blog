@@ -3,7 +3,6 @@ title: "第6期（2026-09-24）：让AI试点进入可量化迭代"
 description: "评估一个AI产品要分清三层：业务结果（是否减少等待、返工或漏检）、流程表现（多少任务真正使用、复核和闭环要多久）、AI质量（字段是否正确、检索回答是否有依据）。模型分数变好不必然代表业务变好。先选一项主要业务指标，再配质量与安全护栏，并写清统计口径、基线、周期和负责人。"
 date: "2026-09-24"
 category: "ai"
-cover: "/covers/ai-pair-programming.jpg"
 tags: ["食品制造", "AI产品架构师", "每日学习"]
 learningContentSha256: "b6fb0604b78de55f9340fc36ad50d7b9efadd54b41ac54fd9e50ee4d5b64a97b"
 ---

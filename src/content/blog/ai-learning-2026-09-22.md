@@ -3,7 +3,6 @@ title: "第4期（2026-09-22）：让系统稳定、可追踪、可控制"
 description: "功能需求说系统做什么；非功能需求说速度、稳定性、安全和保存期限等质量要求。"
 date: "2026-09-22"
 category: "ai"
-cover: "/covers/ai-pair-programming.jpg"
 tags: ["食品制造", "AI产品架构师", "每日学习"]
 learningContentSha256: "0789faf2ae918f100d9f3f9750cea1973b62c7303843bbb4bd5b79d4e3ef3933"
 ---

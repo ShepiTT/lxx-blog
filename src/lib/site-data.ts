@@ -21,6 +21,14 @@ export const siteSchema = z.object({
   heroImage: image,
   startDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, '日期格式应为 2026-10-06'),
   socials: z.array(z.object({ name: text(20).min(1), href, icon: z.enum(SOCIAL_ICONS) })).max(12),
+  // 首页个人介绍板块；text 里用空行分段。
+  intro: z.object({
+    role: text(40),
+    text: text(800),
+    skills: z.array(text(20).min(1)).max(16),
+    now: z.array(text(60).min(1)).max(8),
+    email: z.string().trim().max(100).regex(/^$|^[^\s@]+@[^\s@]+\.[^\s@]+$/, '邮箱格式不正确'),
+  }).optional(),
 });
 
 export const linksSchema = z.array(z.object({
@@ -36,8 +44,6 @@ export const albumSchema = z.array(z.object({
   photos: z.array(z.object({ src: image, caption: text(60).optional() })).max(300),
 })).max(50);
 
-export const aboutSchema = z.string().max(20000, '内容太长了');
-
 export type SiteData = z.infer<typeof siteSchema>;
 export type FriendLink = z.infer<typeof linksSchema>[number];
 export type Album = z.infer<typeof albumSchema>[number];
@@ -47,7 +53,6 @@ export const DATA_FILES = {
   site: { path: 'src/data/site.json', schema: siteSchema, label: '站点设置' },
   links: { path: 'src/data/links.json', schema: linksSchema, label: '友链' },
   album: { path: 'src/data/album.json', schema: albumSchema, label: '相册' },
-  about: { path: 'src/data/about.md', schema: aboutSchema, label: '关于我' },
 } as const;
 
 export type DataFileName = keyof typeof DATA_FILES;

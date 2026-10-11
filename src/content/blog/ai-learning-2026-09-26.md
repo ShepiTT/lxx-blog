@@ -3,7 +3,6 @@ title: "第8期（2026-09-26）：把AI能力设计成可靠的业务工作流"
 description: "本期从系统分层继续往下，练习如何把模型和工具调用组织成可控、可验证、可由团队维护的业务流程。以下食品制造场景均为学习示例，具体规则应以企业已批准的制度和授权为准。"
 date: "2026-09-26"
 category: "ai"
-cover: "/covers/ai-pair-programming.jpg"
 tags: ["食品制造", "AI产品架构师", "每日学习"]
 learningContentSha256: "0fc99aee511c87ae897add7c5744934f9517ed8de46fa9c04c4565cdf9eed401"
 ---

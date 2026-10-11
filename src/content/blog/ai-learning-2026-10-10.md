@@ -3,7 +3,6 @@ title: "第18期（2026-10-10）：AI运行应急与回退"
 description: "为已上线的食品制造 AI 应用设计一套可执行的异常发现、事件响应、降级或回退、恢复验证流程。重点是及时识别业务影响、明确协作责任，并在 AI 不可用或结果不可信时安全地转人工；所有阈值、时限和质量处置规则都应由企业责任岗位结合现场风险确认，下面的场景为通用示例。"
 date: "2026-10-10"
 category: "ai"
-cover: "/covers/ai-pair-programming.jpg"
 tags: ["食品制造", "AI产品架构师", "每日学习"]
 learningContentSha256: "e05426a9748414a05501dfc9a4bc6d81080c5fd0a46aee2ad846eed64bd7cb80"
 ---

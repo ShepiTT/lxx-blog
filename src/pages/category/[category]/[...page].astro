@@ -1,0 +1,41 @@
+---
+// /category/<id>/ is page 1; later pages live at /category/<id>/page/N/.
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import Banner from '../../../components/Banner.astro';
+import PostListBlock from '../../../components/PostListBlock.astro';
+import Sidebar from '../../../components/Sidebar.astro';
+import { CATEGORIES } from '../../../site.config';
+import { getPosts, pageCount, categoryUrl } from '../../../lib/posts';
+
+export async function getStaticPaths() {
+  const all = await getPosts();
+  return CATEGORIES.flatMap((category) => {
+    const total = pageCount(all.filter((p) => p.data.category === category.id).length);
+    return Array.from({ length: total }, (_, i) => ({
+      params: { category: category.id, page: i === 0 ? undefined : `page/${i + 1}` },
+      props: { category, page: i + 1, total },
+    }));
+  });
+}
+
+interface Props {
+  category: (typeof CATEGORIES)[number];
+  page: number;
+  total: number;
+}
+const { category, page, total } = Astro.props;
+const all = await getPosts();
+const posts = all.filter((p) => p.data.category === category.id);
+---
+
+<BaseLayout title={page > 1 ? `分类：${category.name}（第 ${page} 页）` : `分类：${category.name}`} description={category.description}>
+  <Banner slot="banner" title={`分类：${category.name}`}>
+    <p class="banner-subtitle">{category.description}{total > 1 && ` · 第 ${page} / ${total} 页`}</p>
+  </Banner>
+  <div class="layout">
+    <div class="layout-main">
+      <PostListBlock all={all} posts={posts} page={page} base={categoryUrl(category.id)} current={category.id} heading={category.name} emptyText="这个分类还没有文章，敬请期待～" />
+    </div>
+    <Sidebar />
+  </div>
+</BaseLayout>

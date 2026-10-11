@@ -49,8 +49,27 @@ const ogImage = new URL(image, Astro.site);
         document.documentElement.dataset.theme = dark ? 'dark' : 'light';
       })();
     </script>
-    <!-- 访问统计：vercount（第三方服务，兼容不蒜子），数字会填进页脚、侧边栏和文章阅读量 -->
-    <script defer src="https://events.vercount.one/js"></script>
+    <!-- 访问统计：vercount（第三方服务，兼容不蒜子），数字会填进页脚、侧边栏和文章阅读量。
+         它按域名计数，本地预览会显示全世界 localhost 的总数，所以本地不加载，只显示「本地不统计」。 -->
+    <script is:inline>
+      (() => {
+        const host = location.hostname;
+        const local = host === 'localhost' || host === '127.0.0.1' || host === '[::1]' || host.endsWith('.localhost');
+        if (!local) {
+          const s = document.createElement('script');
+          s.src = 'https://events.vercount.one/js';
+          document.head.append(s);
+          return;
+        }
+        addEventListener('DOMContentLoaded', () => {
+          ['busuanzi_value_site_pv', 'busuanzi_value_site_uv', 'busuanzi_value_page_pv'].forEach((id) => {
+            const el = document.getElementById(id);
+            if (el) el.textContent = '本地不统计';
+          });
+          document.querySelectorAll('[data-stats-line]').forEach((el) => { el.hidden = true; });
+        });
+      })();
+    </script>
   </head>
   <body>
     <a class="skip-link" href="#main">跳到正文</a>

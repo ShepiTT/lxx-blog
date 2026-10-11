@@ -22,7 +22,7 @@ export interface BlogData {
   date: string;
   category: string;
   tags: string[];
-  cover: string;
+  cover?: string;
   draft: boolean;
 }
 
@@ -61,8 +61,7 @@ export function cleanData(type: ItemType, raw: Record<string, unknown>): { data:
     if (!description) return { error: '请填写摘要' };
     if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) return { error: '日期格式应为 2026-10-10' };
     if (!CATEGORIES.some((c) => c.id === category)) return { error: '请选择分类' };
-    if (!cover) return { error: '请上传或填写封面图' };
-    return { data: { title, description, date, category, tags: strings(raw.tags), cover, draft: Boolean(raw.draft) } };
+    return { data: { title, description, date, category, tags: strings(raw.tags), ...(cover ? { cover } : {}), draft: Boolean(raw.draft) } };
   }
   const date = String(raw.date ?? '').trim();
   if (Number.isNaN(Date.parse(date))) return { error: '时间格式不正确' };

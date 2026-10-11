@@ -3,7 +3,6 @@ title: "第15期（2026-10-07）：食品制造AI数据质量闭环"
 description: "AI产品的结果不只取决于模型，也取决于产品编码、批次、工艺记录和设备数据是否可信。本期从识别关键输入开始，逐步学习如何定义质量规则、区分异常类型、安排检查和责任人，并在数据不可靠时保护业务流程。"
 date: "2026-10-07"
 category: "ai"
-cover: "/covers/ai-pair-programming.jpg"
 tags: ["食品制造", "AI产品架构师", "每日学习"]
 learningContentSha256: "08842be2f935709426546150b8532f1fa76be53d7ea34a3ed6cf233d6dd0566d"
 ---

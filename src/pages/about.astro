@@ -1,33 +1,28 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
 import Banner from '../components/Banner.astro';
+import IntroCard from '../components/IntroCard.astro';
+import ProjectList from '../components/ProjectList.astro';
 import SocialLinks from '../components/SocialLinks.astro';
 import Icon from '../components/Icon.astro';
 import { SITE, CATEGORIES } from '../site.config';
 import { getPosts, categoryUrl } from '../lib/posts';
-import { Content as AboutContent } from '../data/about.md';
 
 const posts = await getPosts();
 const countOf = (id: string) => posts.filter((p) => p.data.category === id).length;
+const description = SITE.intro?.role ? `${SITE.author}：${SITE.intro.role}` : `关于 ${SITE.author}`;
 ---
 
-<BaseLayout title="关于我" description={`关于 ${SITE.author}：关注 AI 应用开发的程序员，在这里记录技术、日常与感悟。`}>
+<BaseLayout title="关于我" description={description}>
   <Banner slot="banner" title="关于我" />
   <div class="layout layout-single">
     <div class="layout-main">
-      <div class="card about-card">
-        <div class="about-head">
-          <img class="author-avatar" src={SITE.avatar} width="120" height="120" alt={`${SITE.author} 的头像`} data-edit="site.avatar" />
-          <h2>你好，我是 <span data-edit="site.author">{SITE.author}</span> 👋</h2>
-          <p data-edit="site.motto">{SITE.motto}</p>
-          <SocialLinks />
-        </div>
+      {SITE.intro ? <IntroCard /> : <div class="card empty-state">还没有填写个人介绍。</div>}
 
-        <div class="prose" data-edit="about" data-edit-label="编辑介绍">
-          <AboutContent />
-        </div>
+      <ProjectList />
 
-        <div class="prose"><h2>我在写什么</h2></div>
+      <section class="card" aria-labelledby="topics-title">
+        <h2 id="topics-title" class="card-heading"><Icon name="file" /> 我在博客写什么</h2>
         <div class="topic-grid">
           {CATEGORIES.map((c) => (
             <a class="topic-card" href={categoryUrl(c.id)} data-cat={c.id}>
@@ -37,7 +32,12 @@ const countOf = (id: string) => posts.filter((p) => p.data.category === id).leng
             </a>
           ))}
         </div>
-      </div>
+      </section>
+
+      <section class="card about-contact" aria-labelledby="contact-title">
+        <h2 id="contact-title" class="card-heading"><Icon name="mail" /> 找到我</h2>
+        <SocialLinks labels />
+      </section>
     </div>
   </div>
 </BaseLayout>

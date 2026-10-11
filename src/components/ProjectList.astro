@@ -1,0 +1,46 @@
+---
+// Public GitHub projects, from src/data/projects.json (refresh with `npm run projects:sync`).
+import Icon from './Icon.astro';
+import projectsJson from '../data/projects.json';
+import { SOCIALS } from '../site.config';
+
+interface Project {
+  name: string;
+  description: string;
+  url: string;
+  homepage: string;
+  language: string;
+  stars: number;
+  updated: string;
+}
+const projects = projectsJson as Project[];
+const profile = SOCIALS.find((s) => s.icon === 'github')?.href;
+
+// GitHub's own language colours for the ones likely to show up.
+const LANGUAGE_COLORS: Record<string, string> = {
+  Python: '#3572A5', JavaScript: '#f1e05a', TypeScript: '#3178c6', Vue: '#41b883', HTML: '#e34c26',
+  CSS: '#563d7c', Java: '#b07219', Go: '#00ADD8', Shell: '#89e051', 'Jupyter Notebook': '#DA5B0B',
+};
+---
+
+{projects.length > 0 && (
+  <section class="card" aria-labelledby="projects-title">
+    <div class="projects-head">
+      <h2 id="projects-title" class="card-heading"><Icon name="github" /> 我的项目</h2>
+      {profile && <a class="more-link" href={profile} target="_blank" rel="noopener">在 GitHub 查看全部 <Icon name="chevron" size={14} /></a>}
+    </div>
+    <div class="project-grid">
+      {projects.map((p) => (
+        <a class="project-card" href={p.url} target="_blank" rel="noopener">
+          <strong class="project-name"><Icon name="repo" size={16} /> {p.name}</strong>
+          <p class="project-desc">{p.description || '暂无简介'}</p>
+          <span class="project-meta">
+            {p.language && <span><i class="lang-dot" style={`background:${LANGUAGE_COLORS[p.language] ?? '#8b949e'}`}></i>{p.language}</span>}
+            {p.stars > 0 && <span><Icon name="star" size={13} /> {p.stars}</span>}
+            <span>更新于 {p.updated}</span>
+          </span>
+        </a>
+      ))}
+    </div>
+  </section>
+)}

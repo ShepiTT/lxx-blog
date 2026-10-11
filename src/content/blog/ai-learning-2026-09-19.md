@@ -3,7 +3,6 @@ title: "第2期（2026-09-19）：把需求整理成可设计的数据与权限"
 description: "干系人包括使用系统、提供数据、审批项目或受项目影响的人。只听提出需求的人，容易遗漏关键规则和岗位需要。"
 date: "2026-09-19"
 category: "ai"
-cover: "/covers/ai-pair-programming.jpg"
 tags: ["食品制造", "AI产品架构师", "每日学习"]
 learningContentSha256: "44f6a852157bc700f44aabac8eba6087323e16208ed87c21a55d7e7ae2f8dcd8"
 ---

@@ -1,0 +1,33 @@
+---
+// Home page 2, 3, …: same list as the home page, under a regular-height banner.
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Banner from '../../components/Banner.astro';
+import PostListBlock from '../../components/PostListBlock.astro';
+import Sidebar from '../../components/Sidebar.astro';
+import { SITE } from '../../site.config';
+import { getPosts, pageCount } from '../../lib/posts';
+
+export async function getStaticPaths() {
+  const total = pageCount((await getPosts()).length);
+  return Array.from({ length: total - 1 }, (_, i) => ({ params: { page: String(i + 2) }, props: { page: i + 2, total } }));
+}
+
+interface Props {
+  page: number;
+  total: number;
+}
+const { page, total } = Astro.props;
+const posts = await getPosts();
+---
+
+<BaseLayout title={`第 ${page} 页`}>
+  <Banner slot="banner" title={SITE.title}>
+    <p class="banner-subtitle">第 {page} / {total} 页</p>
+  </Banner>
+  <div class="layout" id="posts">
+    <div class="layout-main">
+      <PostListBlock all={posts} posts={posts} page={page} base="/" firstAnchor="#posts" />
+    </div>
+    <Sidebar />
+  </div>
+</BaseLayout>

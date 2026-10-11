@@ -1,0 +1,65 @@
+[
+  {
+    "name": "CET_practice_questions",
+    "description": "CET-4和CET-6 英语刷题系统，这是一个基于 Python Flask 框架开发的英语四六级真题刷题系统。它能够自动从 PDF 格式的真题卷子中提取题目，并提供一个现代化的 Web 界面供用户进行练习、查看解析以及管理错题。",
+    "url": "https://github.com/ShepiTT/CET_practice_questions",
+    "homepage": "",
+    "language": "Python",
+    "stars": 3,
+    "updated": "2026-09-22"
+  },
+  {
+    "name": "Voice-controlled-Q-A-system",
+    "description": "基于Python的语音控制问答系统，支持语音唤醒，语音问答，基础程序控制，ADB控制（课设专属！！！）",
+    "url": "https://github.com/ShepiTT/Voice-controlled-Q-A-system",
+    "homepage": "",
+    "language": "Python",
+    "stars": 1,
+    "updated": "2025-12-31"
+  },
+  {
+    "name": "multimodal-lab-assistant-agent",
+    "description": "面向本科教学实验室的多模态智能问答智能体：RAG知识库 + 语音/OCR多模态交互 + 安全代码沙箱",
+    "url": "https://github.com/ShepiTT/multimodal-lab-assistant-agent",
+    "homepage": "",
+    "language": "Python",
+    "stars": 0,
+    "updated": "2026-08-31"
+  },
+  {
+    "name": "ai-recipe",
+    "description": "AI 智能菜谱：按人数/口味/场景生成 1-7 天菜单，也能反过来「冰箱有什么做什么」。含网页版与微信小程序。",
+    "url": "https://github.com/ShepiTT/ai-recipe",
+    "homepage": "",
+    "language": "JavaScript",
+    "stars": 0,
+    "updated": "2026-08-29"
+  },
+  {
+    "name": "data-formulator",
+    "description": "Data Formulator 是一套交互式 AI 驱动的数据分析系统，可便捷实现数据接入、数据探索与数据可视化。",
+    "url": "https://github.com/ShepiTT/data-formulator",
+    "homepage": "",
+    "language": "Python",
+    "stars": 0,
+    "updated": "2026-08-28"
+  },
+  {
+    "name": "Document-Processing-Tool",
+    "description": "",
+    "url": "https://github.com/ShepiTT/Document-Processing-Tool",
+    "homepage": "",
+    "language": "Python",
+    "stars": 0,
+    "updated": "2026-01-14"
+  },
+  {
+    "name": "lxx",
+    "description": "这是一个基于树莓派4B和Python 3.7.3的中文语音识别程序，可以将你说的话转换为文字并进行知识库问答。",
+    "url": "https://github.com/ShepiTT/lxx",
+    "homepage": "",
+    "language": "Python",
+    "stars": 0,
+    "updated": "2025-08-15"
+  }
+]

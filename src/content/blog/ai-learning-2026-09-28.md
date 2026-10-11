@@ -3,7 +3,6 @@ title: "第10期（2026-09-28）：设计食品质检视觉AI的可试点方案"
 description: "本期从AI工作流与安全边界继续向具体业务场景推进，练习如何把视觉识别需求转化为可测试、可由现场人员复核的方案。以下生产质检场景均为学习示例，实际判断标准应由业务和质量责任人确认。"
 date: "2026-09-28"
 category: "ai"
-cover: "/covers/ai-pair-programming.jpg"
 tags: ["食品制造", "AI产品架构师", "每日学习"]
 learningContentSha256: "b093d8dc7d43ce2146d194c5a7f6d7f6c2fb02cfe03fc3ae8fed790b2920db68"
 ---

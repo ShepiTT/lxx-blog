@@ -9,12 +9,24 @@ interface Props {
 const { post, eager = false } = Astro.props;
 const { title, description, date, category, tags, cover } = post.data;
 const url = postUrl(post);
+// Without a cover the card shows a date block instead of a stock image.
+const day = String(date.getUTCDate()).padStart(2, '0');
+const yearMonth = `${date.getUTCFullYear()}.${String(date.getUTCMonth() + 1).padStart(2, '0')}`;
+const weekday = `周${'日一二三四五六'[date.getUTCDay()]}`;
 ---
 
-<article class="post-card" data-cat={category} data-post-id={post.id} data-post-title={title}>
-  <a class="post-cover" href={url} tabindex="-1" aria-hidden="true">
-    <img src={cover} alt="" width="640" height="400" loading={eager ? 'eager' : 'lazy'} decoding="async" />
-  </a>
+<article class:list={['post-card', { 'no-cover': !cover }]} data-cat={category} data-post-id={post.id} data-post-title={title}>
+  {cover ? (
+    <a class="post-cover" href={url} tabindex="-1" aria-hidden="true">
+      <img src={cover} alt="" width="640" height="400" loading={eager ? 'eager' : 'lazy'} decoding="async" />
+    </a>
+  ) : (
+    <a class="post-date" href={url} tabindex="-1" aria-hidden="true">
+      <span class="post-date-day">{day}</span>
+      <span class="post-date-month">{yearMonth}</span>
+      <span class="post-date-week">{weekday}</span>
+    </a>
+  )}
   <div class="post-info">
     <h3 class="post-title"><a href={url}>{title}</a></h3>
     <div class="post-meta">

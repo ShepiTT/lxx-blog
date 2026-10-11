@@ -3,7 +3,6 @@ title: "第9期（2026-09-27）：为食品制造AI应用划清数据安全边�
 description: "本期沿着AI工作流继续往下，关注数据从进入应用、被模型处理，到生成答案和留下运行记录时如何降低泄露与误用风险。示例仅用于学习，实际数据分级、存储和调用边界应由企业相关责任人确认。"
 date: "2026-09-27"
 category: "ai"
-cover: "/covers/ai-pair-programming.jpg"
 tags: ["食品制造", "AI产品架构师", "每日学习"]
 learningContentSha256: "811bb96da04b48e8996929c768c14240fec1bf49f1e15d216f46fedf9eaeb1a8"
 ---

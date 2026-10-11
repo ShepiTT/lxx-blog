@@ -3,7 +3,6 @@ title: "第11期（2026-09-29）：让一线员工真正用好AI产品"
 description: "本期从“AI能不能做”转向“员工是否愿意、能够并持续地用”。产品采用不是发个通知或开通账号，而是让工具自然融入真实任务，并且不增加不必要的负担。以下食品制造场景均为学习示例，实际流程应通过现场观察和相关岗位确认。"
 date: "2026-09-29"
 category: "ai"
-cover: "/covers/ai-pair-programming.jpg"
 tags: ["食品制造", "AI产品架构师", "每日学习"]
 learningContentSha256: "e8289a9b15b55db4d31bc31fa52bed3fdb306209cc2f1e3d40355583887f3fdf"
 ---

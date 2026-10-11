@@ -3,7 +3,6 @@ title: "第1期（2026-09-18）：从业务问题到AI方案"
 description: "流程图把一项工作按先后顺序画出来，并标明谁负责、用什么系统、产生什么结果。做产品设计前先画现状流程，再画优化流程，才能找出重复录入、等待和交接问题。"
 date: "2026-09-18"
 category: "ai"
-cover: "/covers/ai-pair-programming.jpg"
 tags: ["食品制造", "AI产品架构师", "每日学习"]
 learningContentSha256: "0e24a7fe15dcd2d233bf0d1b634e78f5baceca30919ad0dda3c4203a36255f14"
 ---

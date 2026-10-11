@@ -484,9 +484,6 @@ def export(docx: Path, requested: str, historical=False):
         else:
             raise ExportError("本期缺少明确的本期目标，停止生成文章摘要")
         description = description[:137] + "…" if len(description) > 138 else description
-        cover = "/covers/ai-pair-programming.jpg"
-        if not (Path(__file__).resolve().parents[1] / "public" / cover.lstrip("/")).is_file():
-            raise ExportError(f"文章封面文件不存在：{cover}")
         body_markdown = reader.render_blocks(selected) + "\n"
         if historical:
             body_markdown = historical_label_markup(body_markdown)
@@ -496,7 +493,7 @@ def export(docx: Path, requested: str, historical=False):
             "description": description,
             "date": issued,
             "category": "ai",
-            "cover": cover,
+            # 不设封面：网站对没有封面的文章显示日期块，封面只在手动添加时出现。
             "tags": ["食品制造", "AI产品架构师", "每日学习"],
             "learningContentSha256": content_hash,
         }

@@ -3,7 +3,6 @@ title: "第3期（2026-09-21）：从产品想法走向可上线方案"
 description: "目标写清服务对象、要解决的问题、衡量指标和范围；非目标写清本期不做什么，避免项目边界持续扩大。"
 date: "2026-09-21"
 category: "ai"
-cover: "/covers/ai-pair-programming.jpg"
 tags: ["食品制造", "AI产品架构师", "每日学习"]
 learningContentSha256: "63b0b682b6080ebd9462a11a80442c079c6a268796bd136a2b60a418471f2826"
 ---

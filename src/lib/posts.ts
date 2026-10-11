@@ -44,3 +44,13 @@ export function tagCounts(posts: Post[]) {
   for (const post of posts) for (const tag of post.data.tags) counts.set(tag, (counts.get(tag) ?? 0) + 1);
   return [...counts].map(([tag, count]) => ({ tag, count })).sort((a, b) => b.count - a.count || a.tag.localeCompare(b.tag, 'zh'));
 }
+
+// ---------- Pagination ----------
+export const PAGE_SIZE = 6;
+
+export const pageCount = (total: number) => Math.max(1, Math.ceil(total / PAGE_SIZE));
+
+export const pageSlice = <T>(items: T[], page: number) => items.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
+
+/** Page 1 lives at the list's own URL; later pages at <base>page/N/. */
+export const pageUrl = (base: string, page: number) => (page <= 1 ? base : `${base}page/${page}/`);

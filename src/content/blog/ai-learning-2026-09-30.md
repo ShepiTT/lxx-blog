@@ -3,7 +3,6 @@ title: "第12期（2026-09-30）：测算食品制造AI项目的投入产出"
 description: "本期学习如何判断一个AI项目是否值得继续投入。测算时要把实际业务改善、项目全周期成本和食品质量等约束放在一起看，不能把模型调用量、节省时间的理论值直接当成现金收益。以下数字和场景均为演示用假设，实际测算需由业务、财务和项目团队共同确认。"
 date: "2026-09-30"
 category: "ai"
-cover: "/covers/ai-pair-programming.jpg"
 tags: ["食品制造", "AI产品架构师", "每日学习"]
 learningContentSha256: "03e3f157ed0fdc611184025b87881fba251eb98d852cba7a5ef8fdfd3ffff813"
 ---

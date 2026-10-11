@@ -15,22 +15,12 @@
   "socials": [
     {
       "name": "GitHub",
-      "href": "#",
+      "href": "https://github.com/ShepiTT",
       "icon": "github"
     },
     {
-      "name": "X",
-      "href": "#",
-      "icon": "x"
-    },
-    {
-      "name": "公众号",
-      "href": "#",
-      "icon": "wechat"
-    },
-    {
       "name": "邮箱",
-      "href": "#",
+      "href": "mailto:ziyuma360@gmail.com",
       "icon": "mail"
     },
     {
@@ -38,5 +28,26 @@
       "href": "/rss.xml",
       "icon": "rss"
     }
-  ]
+  ],
+  "intro": {
+    "role": "食品制造行业 AI 产品全栈开发 & 产品经理",
+    "text": "我在一家食品制造公司做 AI 产品开发：一边把公司的旧系统整合起来，一边用 AI 为业务赋能。\n\n此前在一家科技公司做了一年 AI 应用开发，基于 Coze、Dify 快速搭建 Agent，开发后端接口，也一直在跟进前沿 AI 的进展。\n\n现在回到传统行业，用 AI 重新整合和分配资源，优化业务流程与公司管理，从需求到上线全栈完成。",
+    "skills": [
+      "AI 产品设计",
+      "Agent 开发",
+      "Coze / Dify",
+      "后端接口开发",
+      "全栈开发",
+      "系统集成",
+      "业务流程优化",
+      "制造业数字化"
+    ],
+    "now": [
+      "整合公司的旧系统，打通数据和流程",
+      "用 AI 优化业务流程和公司管理",
+      "每天整理一期 AI 产品架构师学习笔记",
+      "持续关注前沿 AI 的发展"
+    ],
+    "email": "ziyuma360@gmail.com"
+  }
 }

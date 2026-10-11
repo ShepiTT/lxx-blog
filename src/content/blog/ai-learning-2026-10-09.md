@@ -3,7 +3,6 @@ title: "第17期（2026-10-09）：AI结果的人审与审计"
 description: "让 AI 输出进入业务流程后仍然可解释、可复核、可追责。重点区分模型建议与正式业务结论，明确谁能查看、谁能复核、谁能批准，并把判断依据和后续动作留成可追溯记录。以下均为通用食品制造示例，实际职责、阈值和质量处置权限须由企业业务责任岗位确认。"
 date: "2026-10-09"
 category: "ai"
-cover: "/covers/ai-pair-programming.jpg"
 tags: ["食品制造", "AI产品架构师", "每日学习"]
 learningContentSha256: "3b963598ad4a239b4c5df9607a0fbbf6bf08ded5d308a3e7ca541612634a17a2"
 ---

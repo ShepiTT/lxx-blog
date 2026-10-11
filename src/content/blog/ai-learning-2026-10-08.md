@@ -3,7 +3,6 @@ title: "第16期（2026-10-08）：让业务事件可靠驱动AI"
 description: "把 MES、QMS 等系统中“已经发生的业务事实”可靠地送入 AI 工作流，并处理契约、时序、失败恢复与端到端核对。它建立在前几期的同步/异步、幂等和数据质量知识之上，本期重点是把这些基础组合成可运营的事件链路。以下均为通用食品制造示例，具体业务规则和质量处置权限应由企业责…"
 date: "2026-10-08"
 category: "ai"
-cover: "/covers/ai-pair-programming.jpg"
 tags: ["食品制造", "AI产品架构师", "每日学习"]
 learningContentSha256: "03dff76a08c5a3ca40997d2a3183626a2e47dc401f6f8db08fcd49840486ba75"
 ---

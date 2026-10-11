@@ -6,11 +6,12 @@ import editorCss from './editor.css?inline';
 import { toast } from '../admin/toast';
 import { uploadImage } from '../admin/upload-client';
 
-type FileName = 'site' | 'links' | 'album' | 'about';
+type FileName = 'site' | 'links' | 'album';
 interface Social { name: string; href: string; icon: string }
+interface Intro { role: string; text: string; skills: string[]; now: string[]; email: string }
 interface Site {
   title: string; author: string; description: string; motto: string; typewriter: string[];
-  notice: string; avatar: string; heroImage: string; startDate: string; socials: Social[];
+  notice: string; avatar: string; heroImage: string; startDate: string; socials: Social[]; intro?: Intro;
 }
 interface FriendLink { name: string; url: string; avatar: string; description: string }
 interface Album { name: string; description: string; photos: { src: string; caption?: string }[] }
@@ -305,18 +306,95 @@ async function editAlbum() {
   }, { wide: true });
 }
 
-// ---------- About ----------
-async function editAbout() {
-  const [text, { marked }] = await Promise.all([load<string>('about'), import('marked')]);
-  const textarea = h('textarea', { class: 'ed-markdown', value: text, rows: 18, spellcheck: false });
-  const preview = h('div', { class: 'prose ed-preview' });
-  const render = () => { preview.innerHTML = marked.parse(textarea.value, { async: false }) as string; };
-  textarea.addEventListener('input', render);
-  render();
-  openDialog('编辑「关于我」', h('div', { class: 'ed-split' },
-    field('内容（Markdown，## 开头是小标题）', textarea), h('div', {}, h('span', { class: 'ed-label' }, '预览'), preview)), async () => {
-    await save('about', textarea.value);
-    document.querySelectorAll<HTMLElement>('[data-edit="about"]').forEach((el) => { el.innerHTML = preview.innerHTML; });
+// ---------- Home page introduction ----------
+const lines = (value: string) => value.split(/[\n,，]/).map((s) => s.trim()).filter(Boolean);
+
+function applyIntro(intro: Intro) {
+  const card = document.querySelector<HTMLElement>('.intro-card');
+  if (!card) return;
+
+  // Match IntroCard's conditional blocks without replacing its editable root.
+  const icon = (name: 'flower' | 'mail') => {
+    const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    for (const [key, value] of Object.entries({ class: 'icon', width: '16', height: '16', viewBox: '0 0 24 24', fill: 'none', stroke: 'currentColor', 'stroke-width': '1.8', 'stroke-linecap': 'round', 'stroke-linejoin': 'round', 'aria-hidden': 'true' })) svg.setAttribute(key, value);
+    svg.innerHTML = name === 'mail'
+      ? '<rect x="3" y="5" width="18" height="14" rx="2.5"/><path d="m4 7 8 6 8-6"/>'
+      : '<circle cx="12" cy="12" r="2.2"/><path d="M12 9.8C9 6 10.5 3 12 3s3 3 0 6.8M14.1 11.3c3.7-2.6 6.7-1 6.7.6s-3.1 3-6.7.4M13.3 14.2c1.6 4.4-.6 6.9-2.2 6.4s-2-3.8.9-6.4M10.7 14.2c-3.9 2.4-6.6.4-6.3-1.2s3.6-2.6 6.3 1.2M9.9 11.3C5.5 10.6 4.8 7.3 6.2 6.4s4.2.4 3.7 4.9"/>';
+    return svg;
+  };
+
+  let role = card.querySelector('.intro-role');
+  if (intro.role) {
+    if (!role) {
+      role = h('p', { class: 'intro-role' });
+      card.querySelector('.intro-head > div')?.append(role);
+    }
+    role.textContent = intro.role;
+  } else role?.remove();
+
+  const text = card.querySelector('.intro-text');
+  if (text) {
+    text.querySelectorAll('p').forEach((p) => p.remove());
+    const paragraphs = intro.text.split(/\n\s*\n/).map((p) => p.trim()).filter(Boolean);
+    text.prepend(...paragraphs.map((p) => h('p', {}, p)));
+    let skills = text.querySelector('.intro-skills');
+    if (intro.skills.length) {
+      if (!skills) {
+        skills = h('ul', { class: 'intro-skills', 'aria-label': '技能与关注领域' });
+        text.append(skills);
+      }
+      skills.replaceChildren(...intro.skills.map((x) => h('li', {}, x)));
+    } else skills?.remove();
+  }
+
+  let now = card.querySelector('.intro-now');
+  if (intro.now.length) {
+    if (!now) {
+      now = h('div', { class: 'intro-now' }, h('h3', {}, icon('flower'), ' 现在在做'), h('ul'));
+      card.querySelector('.intro-body')?.append(now);
+    }
+    now.querySelector('ul')?.replaceChildren(...intro.now.map((x) => h('li', {}, x)));
+  } else now?.remove();
+
+  const actions = card.querySelector('.intro-actions');
+  if (actions) {
+    let email = actions.querySelector('.intro-email');
+    let button = actions.querySelector<HTMLAnchorElement>('a[href^="mailto:"]');
+    if (intro.email) {
+      if (!button) {
+        button = h('a', { class: 'follow-button' }, icon('mail'), ' 发邮件给我');
+        actions.prepend(button);
+      }
+      button.href = `mailto:${intro.email}`;
+      if (!email) {
+        email = h('span', { class: 'intro-email' });
+        button.after(email);
+      }
+      email.textContent = intro.email;
+    } else {
+      button?.remove();
+      email?.remove();
+    }
+  }
+}
+
+async function editIntro() {
+  const site = await load<Site>('site');
+  const intro: Intro = site.intro ?? { role: '', text: '', skills: [], now: [], email: '' };
+  const role = h('input', { value: intro.role, maxLength: 40, placeholder: '例如：AI 产品全栈开发 & 产品经理' });
+  const text = h('textarea', { value: intro.text, rows: 7, maxLength: 800 });
+  const skills = h('textarea', { value: intro.skills.join('\n'), rows: 4 });
+  const now = h('textarea', { value: intro.now.join('\n'), rows: 4 });
+  const email = h('input', { type: 'email', value: intro.email, maxLength: 100, placeholder: 'name@example.com' });
+  openDialog('编辑个人介绍', h('div', { class: 'ed-fields' },
+    field('身份', role),
+    field('个人介绍', text, '空一行就是新的一段'),
+    field('技能 / 关注领域', skills, '每行一个，也可以用逗号分隔'),
+    field('现在在做', now, '每行一件事'),
+    field('联系邮箱', email, '留空就不显示「发邮件给我」按钮')), async () => {
+    site.intro = { role: role.value.trim(), text: text.value.trim(), skills: lines(skills.value), now: lines(now.value), email: email.value.trim() };
+    await save('site', site);
+    applyIntro(site.intro);
     toast(savedMessage());
   }, { wide: true });
 }
@@ -343,13 +421,13 @@ function decorateItems() {
 function openEditor(key: string) {
   if (key === 'site.avatar') return changeImage('avatar');
   if (key === 'site.socials') return editSocials();
+  if (key === 'site.intro') return editIntro();
   if (key.startsWith('site.')) {
     const field = key.slice(5) as SiteField;
     return editSiteFields([field], SITE_FIELDS[field]?.label ?? '修改');
   }
   if (key === 'links') return editLinks();
   if (key === 'album') return editAlbum();
-  if (key === 'about') return editAbout();
   return Promise.resolve();
 }
 

@@ -1,0 +1,45 @@
+---
+// Personal introduction, shown as the main content of the About page.
+// Content lives in src/data/site.json → intro (editable from the page's edit mode).
+import Icon from './Icon.astro';
+import { SITE } from '../site.config';
+
+const intro = SITE.intro;
+const paragraphs = intro?.text.split(/\n\s*\n/).map((p) => p.trim()).filter(Boolean) ?? [];
+---
+
+{intro && (
+  <section class="card intro-card" aria-labelledby="intro-title" data-edit="site.intro" data-edit-label="编辑个人介绍">
+    <div class="intro-head">
+      <img class="intro-avatar" src={SITE.avatar} width="84" height="84" alt={`${SITE.author} 的头像`} />
+      <div>
+        <h2 id="intro-title">你好，我是 {SITE.author} <span aria-hidden="true">👋</span></h2>
+        {intro.role && <p class="intro-role">{intro.role}</p>}
+      </div>
+    </div>
+
+    <div class="intro-body">
+      <div class="intro-text">
+        {paragraphs.map((p) => <p>{p}</p>)}
+        {intro.skills.length > 0 && (
+          <ul class="intro-skills" aria-label="技能与关注领域">
+            {intro.skills.map((s) => <li>{s}</li>)}
+          </ul>
+        )}
+      </div>
+      {intro.now.length > 0 && (
+        <div class="intro-now">
+          <h3><Icon name="flower" size={16} /> 现在在做</h3>
+          <ul>
+            {intro.now.map((n) => <li>{n}</li>)}
+          </ul>
+        </div>
+      )}
+    </div>
+
+    <div class="intro-actions">
+      {intro.email && <a class="follow-button" href={`mailto:${intro.email}`}><Icon name="mail" size={16} /> 发邮件给我</a>}
+      {intro.email && <span class="intro-email">{intro.email}</span>}
+    </div>
+  </section>
+)}

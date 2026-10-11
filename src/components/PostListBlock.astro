@@ -1,0 +1,30 @@
+---
+// Category bar + one page of post cards + page numbers, shared by the home page, its later
+// pages and the category pages.
+import CategoryNav from './CategoryNav.astro';
+import PostCard from './PostCard.astro';
+import Pagination from './Pagination.astro';
+import { pageCount, pageSlice, type Post } from '../lib/posts';
+
+interface Props {
+  /** Every published post (for the category counts). */
+  all: Post[];
+  /** The posts this list pages through. */
+  posts: Post[];
+  page: number;
+  base: string;
+  current?: string;
+  heading?: string;
+  firstAnchor?: string;
+  emptyText?: string;
+}
+const { all, posts, page, base, current = 'all', heading, firstAnchor, emptyText = '还没有文章，新的内容会在这里更新。' } = Astro.props;
+const visible = pageSlice(posts, page);
+---
+
+<CategoryNav posts={all} current={current} heading={heading} />
+{posts.length === 0 && <div class="card empty-state">{emptyText}</div>}
+<div class="post-list">
+  {visible.map((post, i) => <PostCard post={post} eager={page === 1 && i === 0} />)}
+</div>
+<Pagination current={page} total={pageCount(posts.length)} base={base} firstAnchor={firstAnchor} />
