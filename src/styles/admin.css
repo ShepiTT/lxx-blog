@@ -67,18 +67,10 @@ body.admin { background: var(--bg); }
 .edit-draft { flex-direction: row !important; align-items: center; color: var(--text) !important; font-size: 14px !important; }
 .edit-meta { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px 18px; }
 .span-2 { grid-column: 1 / -1; }
-.cover-field, .talk-images-field { display: flex; flex-direction: column; gap: 6px; color: var(--text-2); font-size: 13px; }
+.cover-field { display: flex; flex-direction: column; gap: 6px; color: var(--text-2); font-size: 13px; }
 .cover-row { display: flex; align-items: center; gap: 10px; }
 .cover-row img { width: 96px; height: 60px; border-radius: 6px; object-fit: cover; }
 .file-btn { flex-direction: row !important; color: var(--text) !important; }
-.talk-image-list { display: flex; flex-wrap: wrap; gap: 8px; }
-.talk-image-item { position: relative; width: 96px; height: 96px; }
-.talk-image-item img { width: 100%; height: 100%; border-radius: 8px; object-fit: cover; }
-.talk-image-item button {
-  position: absolute; top: -6px; right: -6px; width: 22px; height: 22px; border: 0; border-radius: 50%;
-  background: #e05a5a; color: #fff; font-size: 14px; line-height: 1; cursor: pointer;
-}
-.talk-images-field .file-btn { align-self: flex-start; }
 
 .edit-body { display: flex; flex-direction: column; gap: 10px; }
 .edit-toolbar { display: flex; align-items: center; justify-content: space-between; color: var(--text-2); font-size: 13px; }

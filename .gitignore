@@ -5,3 +5,5 @@ dist/
 .env*
 output/
 __pycache__/
+# 本地开发时的留言数据（线上存在 GitHub 的 messages 分支）
+.data/

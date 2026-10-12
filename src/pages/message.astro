@@ -1,23 +1,293 @@
 ---
+// 留言板：填昵称就能留言，留言会变成弹幕飘过顶部的海面，下面是完整列表。
+// 数据来自 /api/messages；所有留言内容都只用 textContent 显示，不会被当成 HTML。
 import BaseLayout from '../layouts/BaseLayout.astro';
 import Banner from '../components/Banner.astro';
-import Comments from '../components/Comments.astro';
 import Icon from '../components/Icon.astro';
 import { SITE } from '../site.config';
+import { MESSAGE_LIMITS } from '../lib/message-rules';
 ---
 
 <BaseLayout title="留言" description={`给 ${SITE.author} 留言。`}>
   <Banner slot="banner" title="留言板">
     <p class="banner-subtitle">有什么想说的，都可以留在这里</p>
+    <div slot="after" class="barrage" data-barrage aria-hidden="true"></div>
   </Banner>
   <div class="layout layout-single">
     <div class="layout-main">
-      <section class="card message-intro">
-        <h2 class="card-heading"><Icon name="message" /> 写在前面</h2>
-        <p>欢迎来到留言板！技术问题、文章建议、交换友链，或者只是路过打个招呼，都可以在下面留言。</p>
-        <p>留言需要用 GitHub 账号登录，我会尽量一一回复～</p>
+      <section class="card message-intro" aria-labelledby="message-form-title">
+        <h2 id="message-form-title" class="card-heading"><Icon name="message" /> 写留言</h2>
+        <p>技术问题、文章建议、交换友链，或者只是路过打个招呼，都欢迎～ 你的留言会变成弹幕飘过上面的海面。</p>
+        <form class="message-form" data-message-form data-max-name={MESSAGE_LIMITS.name} data-max-text={MESSAGE_LIMITS.text} novalidate>
+          <input class="message-name" name="name" maxlength={MESSAGE_LIMITS.name} placeholder="昵称" autocomplete="nickname" aria-label="昵称" required />
+          <input class="message-text" name="text" maxlength={MESSAGE_LIMITS.text} placeholder={`想说点什么…（${MESSAGE_LIMITS.text} 字以内）`} autocomplete="off" aria-label="留言内容" required />
+          <button class="follow-button" type="submit"><Icon name="send" size={16} /> 发射</button>
+          <label class="message-hp" aria-hidden="true">网站<input name="website" tabindex="-1" autocomplete="off" /></label>
+        </form>
+        <p class="message-tip"><span data-count>0</span>/{MESSAGE_LIMITS.text} · 只支持纯文字，不能放链接和代码 · 每分钟最多 1 条</p>
+        <p class="message-status" role="status" aria-live="polite" data-status></p>
       </section>
-      <div class="card"><Comments heading="留言" /></div>
+
+      <section class="card" aria-labelledby="message-list-title">
+        <h2 id="message-list-title" class="card-heading"><Icon name="comment" /> 大家的留言 <small class="message-total" data-total></small></h2>
+        <ol class="message-list" data-message-list></ol>
+        <p class="message-empty" data-empty>留言加载中…</p>
+        <button class="message-more" type="button" data-more hidden>加载更多</button>
+      </section>
     </div>
   </div>
 </BaseLayout>
+
+<script>
+  interface Message { id: string; name: string; text: string; time: string }
+
+  const PAGE = 20;
+  const form = document.querySelector<HTMLFormElement>('[data-message-form]')!;
+  const nameInput = form.querySelector<HTMLInputElement>('[name="name"]')!;
+  const textInput = form.querySelector<HTMLInputElement>('[name="text"]')!;
+  const submit = form.querySelector<HTMLButtonElement>('button[type="submit"]')!;
+  const status = document.querySelector<HTMLElement>('[data-status]')!;
+  const count = document.querySelector<HTMLElement>('[data-count]')!;
+  const list = document.querySelector<HTMLOListElement>('[data-message-list]')!;
+  const empty = document.querySelector<HTMLElement>('[data-empty]')!;
+  const total = document.querySelector<HTMLElement>('[data-total]')!;
+  const more = document.querySelector<HTMLButtonElement>('[data-more]')!;
+  const maxName = Number(form.dataset.maxName);
+  const maxText = Number(form.dataset.maxText);
+  const opened = Date.now();
+
+  let messages: Message[] = [];
+  let shown = 0;
+  let isAdmin = false;
+
+  const chars = (s: string) => [...s.trim()].length;
+  const say = (text: string, error = false) => {
+    status.textContent = text;
+    status.classList.toggle('error', error);
+  };
+
+  // ---------- Rendering (text only, never innerHTML) ----------
+  const hue = (s: string) => [...s].reduce((h, c) => (h * 31 + c.codePointAt(0)!) % 360, 7);
+  function avatar(name: string) {
+    const el = document.createElement('span');
+    el.className = 'message-avatar';
+    el.textContent = [...name][0] ?? '?';
+    el.style.background = `hsl(${hue(name)} 60% 55%)`;
+    return el;
+  }
+
+  const fullTime = new Intl.DateTimeFormat('zh-CN', { timeZone: 'Asia/Shanghai', dateStyle: 'medium', timeStyle: 'short' });
+  function ago(iso: string) {
+    const s = (Date.now() - Date.parse(iso)) / 1000;
+    if (s < 60) return '刚刚';
+    if (s < 3600) return `${Math.floor(s / 60)} 分钟前`;
+    if (s < 86400) return `${Math.floor(s / 3600)} 小时前`;
+    if (s < 86400 * 30) return `${Math.floor(s / 86400)} 天前`;
+    return fullTime.format(new Date(iso));
+  }
+
+  function item(m: Message) {
+    const li = document.createElement('li');
+    li.className = 'message-item';
+    const body = document.createElement('div');
+    body.className = 'message-body';
+    const meta = document.createElement('div');
+    meta.className = 'message-meta';
+    const who = document.createElement('strong');
+    who.textContent = m.name;
+    const time = document.createElement('time');
+    time.dateTime = m.time;
+    time.title = fullTime.format(new Date(m.time));
+    time.textContent = ago(m.time);
+    meta.append(who, time);
+    const text = document.createElement('p');
+    text.textContent = m.text;
+    body.append(meta, text);
+    li.append(avatar(m.name), body);
+    if (isAdmin) {
+      const del = document.createElement('button');
+      del.type = 'button';
+      del.className = 'message-delete';
+      del.textContent = '删除';
+      del.addEventListener('click', () => remove(m, li, del));
+      li.append(del);
+    }
+    return li;
+  }
+
+  function refreshCounts() {
+    total.textContent = messages.length ? `${messages.length}` : '';
+    empty.textContent = '还没有留言，来做第一个吧～';
+    empty.hidden = messages.length > 0;
+    more.hidden = shown >= messages.length;
+  }
+
+  function showMore() {
+    const next = messages.slice(shown, shown + PAGE);
+    list.append(...next.map(item));
+    shown += next.length;
+    refreshCounts();
+  }
+  more.addEventListener('click', showMore);
+
+  async function remove(m: Message, li: HTMLLIElement, btn: HTMLButtonElement) {
+    if (!confirm(`删除「${m.name}」的这条留言吗？`)) return;
+    btn.disabled = true;
+    const res = await fetch('/api/admin/messages', {
+      method: 'DELETE',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id: m.id }),
+    }).catch(() => null);
+    if (res?.ok) {
+      li.remove();
+      messages = messages.filter((x) => x.id !== m.id);
+      barrage.remove(m.id);
+      shown--;
+      refreshCounts();
+    } else {
+      btn.disabled = false;
+      alert((await res?.json().catch(() => null))?.error ?? '删除失败');
+    }
+  }
+
+  // ---------- Barrage over the banner ----------
+  const barrage = (() => {
+    const box = document.querySelector<HTMLElement>('[data-barrage]');
+    if (!box || matchMedia('(prefers-reduced-motion: reduce)').matches) return { push(_m: Message) {}, start(_all: Message[]) {}, remove(_id: string) {} };
+    const LANE = 44;
+    let lanes: { top: number; freeAt: number }[] = [];
+    let pool: Message[] = [];
+    let next = 0;
+    let visible = true;
+
+    // Lanes fill the banner but skip the band where the title and subtitle sit.
+    const layout = () => {
+      const area = box.getBoundingClientRect();
+      const words = [...document.querySelectorAll('.banner-title, .banner-subtitle')].map((el) => el.getBoundingClientRect());
+      const top = Math.min(...words.map((r) => r.top)) - 8;
+      const bottom = Math.max(...words.map((r) => r.bottom)) + 8;
+      lanes = [];
+      for (let y = 0; y + 36 <= area.height; y += LANE) {
+        const a = area.top + y;
+        if (a + 36 < top || a > bottom) lanes.push({ top: y, freeAt: 0 });
+      }
+    };
+
+    const fly = (m: Message, mine = false) => {
+      const now = performance.now();
+      const lane = lanes.filter((l) => l.freeAt <= now).sort((a, b) => a.freeAt - b.freeAt)[0];
+      if (!lane) return false;
+      const el = document.createElement('div');
+      el.className = `barrage-item${mine ? ' mine' : ''}`;
+      el.dataset.messageId = m.id;
+      el.style.top = `${lane.top}px`;
+      const text = document.createElement('span');
+      text.textContent = `${m.name}：${m.text}`;
+      el.append(avatar(m.name), text);
+      box.append(el);
+      const width = el.offsetWidth;
+      const distance = box.clientWidth + width;
+      const speed = 80 + Math.random() * 40; // px per second
+      const anim = el.animate(
+        [{ transform: `translateX(${box.clientWidth}px)` }, { transform: `translateX(${-width}px)` }],
+        { duration: (distance / speed) * 1000, easing: 'linear' },
+      );
+      anim.onfinish = () => el.remove();
+      el.addEventListener('mouseenter', () => anim.pause());
+      el.addEventListener('mouseleave', () => anim.play());
+      lane.freeAt = now + ((width + 48) / speed) * 1000;
+      return true;
+    };
+
+    new IntersectionObserver(([entry]) => { visible = entry.isIntersecting; }).observe(box);
+    addEventListener('resize', layout);
+    layout();
+
+    return {
+      // Moderated messages leave both the active lanes and the repeating pool immediately.
+      remove(id: string) {
+        pool = pool.filter((m) => m.id !== id);
+        box.querySelectorAll<HTMLElement>('[data-message-id]').forEach((el) => {
+          if (el.dataset.messageId === id) {
+            el.getAnimations().forEach((animation) => animation.cancel());
+            el.remove();
+          }
+        });
+      },
+      // A new message flies right away and joins the loop.
+      push(m: Message) {
+        pool.unshift(m);
+        fly(m, true);
+      },
+      start(all: Message[]) {
+        pool = all.slice(0, 100);
+        setInterval(() => {
+          if (!pool.length || !visible || document.hidden || box.childElementCount >= 14) return;
+          if (fly(pool[next % pool.length])) next++;
+        }, 1100);
+      },
+    };
+  })();
+
+  // ---------- Posting ----------
+  try { nameInput.value = localStorage.getItem('message-name') ?? ''; } catch {}
+  const updateCount = () => {
+    const n = chars(textInput.value);
+    count.textContent = String(n);
+    count.parentElement!.classList.toggle('over', n > maxText);
+  };
+  textInput.addEventListener('input', updateCount);
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const name = nameInput.value.trim();
+    const text = textInput.value.trim();
+    if (!name) return say('请填写昵称', true);
+    if (!text) return say('请写点什么吧', true);
+    if (chars(name) > maxName) return say(`昵称最多 ${maxName} 个字`, true);
+    if (chars(text) > maxText) return say(`留言最多 ${maxText} 个字`, true);
+    if (/[<>]/.test(name + text)) return say('留言只支持纯文字，不能包含 < > 等代码符号', true);
+
+    submit.disabled = true;
+    say('发送中…');
+    try {
+      const res = await fetch('/api/messages', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, text, website: (form.elements.namedItem('website') as HTMLInputElement).value, elapsed: Date.now() - opened }),
+      });
+      const out = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(out.error ?? '发送失败，请稍后再试');
+      const m = out.message as Message;
+      messages.unshift(m);
+      list.prepend(item(m));
+      shown++;
+      refreshCounts();
+      barrage.push(m);
+      textInput.value = '';
+      updateCount();
+      try { localStorage.setItem('message-name', name); } catch {}
+      say('留言成功，谢谢你～');
+    } catch (err) {
+      say((err as Error).message, true);
+    } finally {
+      submit.disabled = false;
+    }
+  });
+
+  // ---------- Load ----------
+  (async () => {
+    try {
+      if (localStorage.getItem('admin-hint')) isAdmin = (await fetch('/api/admin/session')).ok;
+    } catch {}
+    try {
+      const res = await fetch('/api/messages');
+      if (!res.ok) throw new Error();
+      messages = ((await res.json()).messages ?? []) as Message[];
+      showMore();
+      barrage.start(messages);
+    } catch {
+      empty.textContent = '留言加载失败，请稍后刷新再试';
+    }
+  })();
+</script>

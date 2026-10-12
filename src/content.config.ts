@@ -20,15 +20,4 @@ const blog = defineCollection({
   }),
 });
 
-// 说说：短动态，每条一个 .md 文件，放在 src/content/talks/
-const talks = defineCollection({
-  loader: glob({ pattern: '**/*.md', base: './src/content/talks' }),
-  schema: z.object({
-    date: z.coerce.date(),
-    // 配图放在 public/ 下，写路径即可，最多建议 9 张
-    images: z.array(z.string()).default([]),
-    tags: z.array(z.string()).default([]),
-  }),
-});
-
-export const collections = { blog, talks };
+export const collections = { blog };

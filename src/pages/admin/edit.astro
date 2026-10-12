@@ -1,13 +1,12 @@
 ---
 import AdminLayout from '../../layouts/AdminLayout.astro';
-import { isItemType, isValidId, itemPath, parseMarkdown, toDateString } from '../../lib/admin/content';
+import { isValidId, itemPath, parseMarkdown, toDateString } from '../../lib/admin/content';
 import { getStorage, StorageError } from '../../lib/admin/storage';
 import { CATEGORIES } from '../../site.config';
 
 export const prerender = false;
 
-const typeParam = Astro.url.searchParams.get('type');
-const type = isItemType(typeParam) ? typeParam : 'blog';
+const type = 'blog';
 const idParam = Astro.url.searchParams.get('id');
 const isNew = !idParam;
 
@@ -28,14 +27,9 @@ if (!isNew) {
   }
 }
 
-// Beijing time for display and for new items.
-const beijing = (d: Date) => new Date(d.getTime() + 8 * 3600_000).toISOString();
-const now = beijing(new Date());
-const blogDate = isNew ? now.slice(0, 10) : toDateString(data.date).slice(0, 10);
-const talkDate = isNew ? now.slice(0, 16) : (() => {
-  const parsed = Date.parse(toDateString(data.date));
-  return Number.isNaN(parsed) ? now.slice(0, 16) : beijing(new Date(parsed)).slice(0, 16);
-})();
+// New posts default to today's date in Beijing time.
+const today = new Date(Date.now() + 8 * 3600_000).toISOString().slice(0, 10);
+const blogDate = isNew ? today : toDateString(data.date).slice(0, 10);
 const list = (v: unknown) => (Array.isArray(v) ? v.map(String) : []);
 
 const initial = {
@@ -43,57 +37,44 @@ const initial = {
   isNew,
   id: idParam ?? '',
   sha,
-  images: list(data.images),
 };
-const heading = `${isNew ? (type === 'blog' ? '写文章' : '发说说') : type === 'blog' ? '编辑文章' : '编辑说说'}`;
+const heading = isNew ? '写文章' : '编辑文章';
 ---
 
 <AdminLayout title={heading}>
   <header class="admin-bar">
     <a class="admin-btn ghost" href="/admin/">← 返回</a>
     <span class="admin-brand">{heading}</span>
-    <label class="edit-draft" hidden={type !== 'blog'}><input type="checkbox" name="draft" form="editor" checked={Boolean(data.draft)} /> 存为草稿</label>
+    <label class="edit-draft"><input type="checkbox" name="draft" form="editor" checked={Boolean(data.draft)} /> 存为草稿</label>
     <button class="admin-btn primary" type="submit" form="editor" data-save>发布</button>
   </header>
 
   <main class="admin-main">
     {error && <p class="form-error">{error}</p>}
     <form id="editor" class="edit-form" data-editor data-initial={JSON.stringify(initial)}>
-      {type === 'blog' ? (
-        <section class="admin-panel edit-meta">
-          <label class="span-2">标题<input name="title" value={String(data.title ?? '')} required maxlength="80" /></label>
-          <label>
-            文章地址{isNew ? '（英文小写、数字、短横线）' : '（不可修改）'}
-            <input name="id" value={idParam ?? ''} pattern="[a-z0-9][a-z0-9-]*" placeholder="例如 my-first-post" required readonly={!isNew} />
-          </label>
-          <label>日期<input name="date" type="date" value={blogDate} required /></label>
-          <label>分类
-            <select name="category">
-              {CATEGORIES.map((c) => <option value={c.id} selected={data.category === c.id}>{c.name}</option>)}
-            </select>
-          </label>
-          <label>标签（用逗号分隔）<input name="tags" value={list(data.tags).join(', ')} placeholder="RAG, LLM" /></label>
-          <label class="span-2">摘要（显示在文章卡片上）<textarea name="description" rows="2" required maxlength="200">{String(data.description ?? '')}</textarea></label>
-          <div class="span-2 cover-field">
-            <span>封面图（可选，不填就不显示图片）</span>
-            <div class="cover-row">
-              <img data-cover-preview src={String(data.cover ?? '') || undefined} alt="" hidden={!data.cover} />
-              <input name="cover" value={String(data.cover ?? '')} placeholder="/uploads/... 或 /covers/..." />
-              <label class="admin-btn ghost file-btn">上传封面<input type="file" accept="image/*" data-cover-upload hidden /></label>
-            </div>
+      <section class="admin-panel edit-meta">
+        <label class="span-2">标题<input name="title" value={String(data.title ?? '')} required maxlength="80" /></label>
+        <label>
+          文章地址{isNew ? '（英文小写、数字、短横线）' : '（不可修改）'}
+          <input name="id" value={idParam ?? ''} pattern="[a-z0-9][a-z0-9-]*" placeholder="例如 my-first-post" required readonly={!isNew} />
+        </label>
+        <label>日期<input name="date" type="date" value={blogDate} required /></label>
+        <label>分类
+          <select name="category">
+            {CATEGORIES.map((c) => <option value={c.id} selected={data.category === c.id}>{c.name}</option>)}
+          </select>
+        </label>
+        <label>标签（用逗号分隔）<input name="tags" value={list(data.tags).join(', ')} placeholder="RAG, LLM" /></label>
+        <label class="span-2">摘要（显示在文章卡片上）<textarea name="description" rows="2" required maxlength="200">{String(data.description ?? '')}</textarea></label>
+        <div class="span-2 cover-field">
+          <span>封面图（可选，不填就不显示图片）</span>
+          <div class="cover-row">
+            <img data-cover-preview src={String(data.cover ?? '') || undefined} alt="" hidden={!data.cover} />
+            <input name="cover" value={String(data.cover ?? '')} placeholder="/uploads/... 或 /covers/..." />
+            <label class="admin-btn ghost file-btn">上传封面<input type="file" accept="image/*" data-cover-upload hidden /></label>
           </div>
-        </section>
-      ) : (
-        <section class="admin-panel edit-meta">
-          <label>时间（北京时间）<input name="date" type="datetime-local" value={talkDate} required /></label>
-          <label>标签（用逗号分隔）<input name="tags" value={list(data.tags).join(', ')} placeholder="生活, AI" /></label>
-          <div class="span-2 talk-images-field">
-            <span>配图</span>
-            <div class="talk-image-list" data-talk-images></div>
-            <label class="admin-btn ghost file-btn">添加图片<input type="file" accept="image/*" multiple data-talk-upload hidden /></label>
-          </div>
-        </section>
-      )}
+        </div>
+      </section>
 
       <section class="admin-panel edit-body">
         <div class="edit-toolbar">
@@ -101,7 +82,7 @@ const heading = `${isNew ? (type === 'blog' ? '写文章' : '发说说') : type 
           <label class="admin-btn ghost file-btn">插入图片<input type="file" accept="image/*" data-insert-image hidden /></label>
         </div>
         <div class="edit-panes">
-          <textarea name="body" data-body spellcheck="false" placeholder={type === 'blog' ? '## 小标题\n\n正文……' : '想说点什么……'}>{body}</textarea>
+          <textarea name="body" data-body spellcheck="false" placeholder={'## 小标题\n\n正文……'}>{body}</textarea>
           <div class="edit-preview prose" data-preview></div>
         </div>
       </section>
@@ -115,7 +96,7 @@ const heading = `${isNew ? (type === 'blog' ? '写文章' : '发说说') : type 
   import { uploadImage } from '../../lib/admin/upload-client';
 
   const form = document.querySelector<HTMLFormElement>('[data-editor]')!;
-  const initial = JSON.parse(form.dataset.initial!) as { type: 'blog' | 'talks'; isNew: boolean; id: string; sha: string; images: string[] };
+  const initial = JSON.parse(form.dataset.initial!) as { type: 'blog'; isNew: boolean; id: string; sha: string };
   const bodyInput = form.querySelector<HTMLTextAreaElement>('[data-body]')!;
   const preview = form.querySelector<HTMLElement>('[data-preview]')!;
   const saveBtn = document.querySelector<HTMLButtonElement>('[data-save]')!;
@@ -183,56 +164,16 @@ const heading = `${isNew ? (type === 'blog' ? '写文章' : '发说说') : type 
     if (url) { coverInput.value = url; showCover(); }
   });
 
-  // Talk images
-  const images = [...initial.images];
-  const imageList = form.querySelector<HTMLElement>('[data-talk-images]');
-  const renderImages = () => {
-    if (!imageList) return;
-    imageList.innerHTML = '';
-    images.forEach((src, i) => {
-      const item = document.createElement('div');
-      item.className = 'talk-image-item';
-      const img = document.createElement('img');
-      img.src = previewSrc(src);
-      img.alt = '';
-      const remove = document.createElement('button');
-      remove.type = 'button';
-      remove.textContent = '×';
-      remove.setAttribute('aria-label', '移除这张图');
-      remove.addEventListener('click', () => { images.splice(i, 1); dirty = true; renderImages(); });
-      item.append(img, remove);
-      imageList.append(item);
-    });
-  };
-  renderImages();
-  form.querySelector<HTMLInputElement>('[data-talk-upload]')?.addEventListener('change', async (e) => {
-    const input = e.target as HTMLInputElement;
-    const files = [...(input.files ?? [])];
-    input.value = '';
-    for (const file of files) {
-      const url = await upload(file);
-      if (url) { images.push(url); renderImages(); }
-    }
-  });
-
   // Save
   form.addEventListener('submit', async (e) => {
     e.preventDefault();
     const fd = new FormData(form);
     const tags = String(fd.get('tags') ?? '').split(/[,，]/).map((t) => t.trim()).filter(Boolean);
-    let id = initial.id;
-    let data: Record<string, unknown>;
-    if (initial.type === 'blog') {
-      if (initial.isNew) id = String(fd.get('id') ?? '').trim();
-      data = {
-        title: fd.get('title'), description: fd.get('description'), date: fd.get('date'),
-        category: fd.get('category'), tags, cover: fd.get('cover'), draft: fd.get('draft') === 'on',
-      };
-    } else {
-      const local = String(fd.get('date'));
-      if (initial.isNew) id = `${local.replace('T', '-').replace(':', '')}${new Date().getSeconds().toString().padStart(2, '0')}`;
-      data = { date: `${local}:00+08:00`, images, tags };
-    }
+    const id = initial.isNew ? String(fd.get('id') ?? '').trim() : initial.id;
+    const data = {
+      title: fd.get('title'), description: fd.get('description'), date: fd.get('date'),
+      category: fd.get('category'), tags, cover: fd.get('cover'), draft: fd.get('draft') === 'on',
+    };
 
     saveBtn.disabled = true;
     saveBtn.textContent = '发布中…';

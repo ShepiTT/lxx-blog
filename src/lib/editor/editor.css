@@ -11,7 +11,7 @@ html.editing .tag-orbit { pointer-events: none; }
 html.editing .tag-orbit a { pointer-events: none; }
 
 .ed-item-actions { display: none; }
-html.editing [data-post-id], html.editing [data-talk-id] { position: relative; }
+html.editing [data-post-id] { position: relative; }
 html.editing .ed-item-actions { position: absolute; top: 10px; right: 10px; z-index: 5; display: flex; gap: 6px; }
 .ed-removed { opacity: .3; pointer-events: none; filter: grayscale(1); }
 

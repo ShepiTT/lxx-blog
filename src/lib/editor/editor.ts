@@ -1,6 +1,6 @@
 // On-page edit mode. Loaded only for a logged-in admin (see EditMode.astro).
 // Elements marked with data-edit="<key>" become clickable; each key opens a small editor
-// that saves through /api/admin/data. Post cards and talks get edit / delete buttons.
+// that saves through /api/admin/data. Post cards get edit / delete buttons.
 // Inlined and injected at runtime so the stylesheet isn't linked into every visitor's page.
 import editorCss from './editor.css?inline';
 import { toast } from '../admin/toast';
@@ -185,7 +185,7 @@ async function changeImage(key: 'avatar' | 'heroImage') {
   site[key] = url;
   await save('site', site);
   if (key === 'avatar') {
-    document.querySelectorAll<HTMLImageElement>('img[data-edit="site.avatar"], .talk-avatar, .drawer-author img').forEach((img) => { img.src = preview; });
+    document.querySelectorAll<HTMLImageElement>('img[data-edit="site.avatar"], .intro-avatar, .drawer-author img').forEach((img) => { img.src = preview; });
   } else {
     document.querySelectorAll('[data-hero-scene]').forEach((el) => el.remove()); // the animated default picture
     document.querySelectorAll<HTMLElement>('[data-hero-image], .footer').forEach((el) => {
@@ -391,22 +391,22 @@ async function editIntro() {
   }, { wide: true });
 }
 
-// ---------- Posts & talks ----------
-async function removeItem(type: 'blog' | 'talks', id: string, name: string, el: HTMLElement) {
+// ---------- Posts ----------
+async function removePost(id: string, name: string, el: HTMLElement) {
   if (!confirm(`确定删除「${name}」吗？删除后网站上也会消失。`)) return;
-  await api('/api/admin/item', { method: 'DELETE', body: JSON.stringify({ type, id }) });
+  await api('/api/admin/item', { method: 'DELETE', body: JSON.stringify({ type: 'blog', id }) });
   el.classList.add('ed-removed');
   toast(mode === 'github' ? '已删除，网站约 1 分钟后更新' : '已删除');
 }
 
 function decorateItems() {
-  const add = (el: HTMLElement, type: 'blog' | 'talks', id: string, name: string) => {
+  document.querySelectorAll<HTMLElement>('[data-post-id]').forEach((el) => {
+    const id = el.dataset.postId!;
+    const name = el.dataset.postTitle ?? id;
     el.append(h('div', { class: 'ed-item-actions' },
-      h('a', { class: 'ed-btn small', href: `/admin/edit/?type=${type}&id=${encodeURIComponent(id)}` }, '编辑'),
-      h('button', { type: 'button', class: 'ed-btn small danger', onclick: () => run(() => removeItem(type, id, name, el)) }, '删除')));
-  };
-  document.querySelectorAll<HTMLElement>('[data-post-id]').forEach((el) => add(el, 'blog', el.dataset.postId!, el.dataset.postTitle ?? el.dataset.postId!));
-  document.querySelectorAll<HTMLElement>('[data-talk-id]').forEach((el) => add(el, 'talks', el.dataset.talkId!, '这条说说'));
+      h('a', { class: 'ed-btn small', href: `/admin/edit/?type=blog&id=${encodeURIComponent(id)}` }, '编辑'),
+      h('button', { type: 'button', class: 'ed-btn small danger', onclick: () => run(() => removePost(id, name, el)) }, '删除')));
+  });
 }
 
 // ---------- Mode switching ----------
@@ -441,7 +441,6 @@ function setEditing(on: boolean) {
       h('button', { type: 'button', onclick: () => run(() => editSiteFields(ALL_SITE_FIELDS, '站点设置')) }, '站点设置'),
       h('button', { type: 'button', onclick: () => run(() => changeImage('heroImage')) }, '更换首屏图'),
       h('a', { href: '/admin/edit/?type=blog' }, '写文章'),
-      h('a', { href: '/admin/edit/?type=talks' }, '发说说'),
       h('a', { href: '/admin/' }, '后台'),
       h('button', { type: 'button', class: 'ed-exit', onclick: () => setEditing(false) }, '退出编辑'));
     document.body.append(toolbar);

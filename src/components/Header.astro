@@ -15,7 +15,7 @@ const more = [
 ];
 const pages = [
   { href: '/album/', label: '相册', icon: 'image' },
-  { href: '/talk/', label: '说说', icon: 'talk' },
+  { href: categoryUrl('daily'), label: '日常', icon: 'coffee' },
   { href: '/links/', label: '友链', icon: 'friends' },
   { href: '/message/', label: '留言', icon: 'message' },
   { href: '/about/', label: '关于我', icon: 'user' },
@@ -38,7 +38,7 @@ const pages = [
         </ul>
       </div>
       <div class="nav-dropdown">
-        <button class="nav-item" type="button" aria-haspopup="true" aria-current={active('/category/') ? 'page' : undefined}>
+        <button class="nav-item" type="button" aria-haspopup="true" aria-current={active('/category/') && !pages.some((p) => active(p.href)) ? 'page' : undefined}>
           <Icon name="list" size={17} /><span>分类</span>
         </button>
         <ul class="dropdown-list">
@@ -76,7 +76,8 @@ const pages = [
     <li><a href="/"><Icon name="home" /> 主页</a></li>
     <li><a href="/archive/"><Icon name="timeline" /> 时间轴</a></li>
     {CATEGORIES.map((c) => <li><a href={categoryUrl(c.id)}><Icon name="folder" /> {c.name}</a></li>)}
-    {pages.map((p) => <li><a href={p.href}><Icon name={p.icon} /> {p.label}</a></li>)}
+    {/* 「日常」already appears above with the other categories. */}
+    {pages.filter((p) => !p.href.startsWith('/category/')).map((p) => <li><a href={p.href}><Icon name={p.icon} /> {p.label}</a></li>)}
     {more.map((m) => <li><a href={m.href}><Icon name={m.icon} /> {m.label}</a></li>)}
   </ul>
   <SocialLinks />

@@ -24,7 +24,7 @@
 | 内容 | 路径 |
 | --- | --- |
 | 页面、布局、组件 | `src/pages/`、`src/layouts/`、`src/components/` |
-| 文章 / 说说 | `src/content/blog/`、`src/content/talks/` |
+| 文章（导航「日常」= 日常分类） | `src/content/blog/` |
 | 站点资料（含「关于我」页的个人介绍 `intro`）、友链、相册 | `src/data/site.json`、`src/data/links.json`、`src/data/album.json` |
 | 图片与静态资源 | `public/` |
 | 内容 schema | `src/content.config.ts` |
@@ -32,6 +32,7 @@
 | 域名、Markdown、适配器 | `astro.config.mjs` |
 | 后台存储选择 | `src/lib/admin/storage.ts` |
 | 学习手册导出与发布 | `scripts/export-learning.py`、`scripts/publish-learning.mjs` |
+| 留言板 | 页面 `src/pages/message.astro`，接口 `src/pages/api/messages.ts`，逻辑 `src/lib/messages.ts`；线上数据在 GitHub `messages` 分支（不要合并或删除这个分支），本地在 `.data/messages.json` |
 
 ## 本地后台可能写入线上
 
