@@ -5,8 +5,9 @@ import { postUrl, tagUrl, categoryUrl, categoryName, isoDate, readingMinutes, ty
 interface Props {
   post: Post;
   eager?: boolean;
+  pinned?: boolean;
 }
-const { post, eager = false } = Astro.props;
+const { post, eager = false, pinned = false } = Astro.props;
 const { title, description, date, category, tags, cover } = post.data;
 const url = postUrl(post);
 // Without a cover the card shows a date block instead of a stock image.
@@ -30,6 +31,7 @@ const weekday = `周${'日一二三四五六'[date.getUTCDay()]}`;
   <div class="post-info">
     <h3 class="post-title"><a href={url}>{title}</a></h3>
     <div class="post-meta">
+      {pinned && <span class="post-pin"><Icon name="up" size={14} />置顶</span>}
       <span><Icon name="calendar" size={14} /> 发表于 <time datetime={isoDate(date)}>{isoDate(date)}</time></span>
       <span class="sep">|</span>
       <span><Icon name="folder" size={14} /> <a href={categoryUrl(category)}>{categoryName(category)}</a></span>

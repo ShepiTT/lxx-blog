@@ -16,6 +16,7 @@ const blog = defineCollection({
     // 可选。不填就不显示图片（卡片左侧显示日期）；填写时放在 public/ 下，例如 /uploads/... 或 /covers/...
     cover: z.string().optional(),
     draft: z.boolean().default(false),
+    pinned: z.boolean().default(false),
     learningContentSha256: z.string().regex(/^[a-f0-9]{64}$/).optional(),
   }),
 });

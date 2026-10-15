@@ -66,6 +66,7 @@ const heading = isNew ? '写文章' : '编辑文章';
         </label>
         <label>标签（用逗号分隔）<input name="tags" value={list(data.tags).join(', ')} placeholder="RAG, LLM" /></label>
         <label class="span-2">摘要（显示在文章卡片上）<textarea name="description" rows="2" required maxlength="200">{String(data.description ?? '')}</textarea></label>
+        <label class="span-2 edit-draft"><input type="checkbox" name="pinned" checked={data.pinned === true} /> 首页置顶</label>
         <div class="span-2 cover-field">
           <span>封面图（可选，不填就不显示图片）</span>
           <div class="cover-row">
@@ -173,6 +174,7 @@ const heading = isNew ? '写文章' : '编辑文章';
     const data = {
       title: fd.get('title'), description: fd.get('description'), date: fd.get('date'),
       category: fd.get('category'), tags, cover: fd.get('cover'), draft: fd.get('draft') === 'on',
+      pinned: fd.get('pinned') === 'on',
     };
 
     saveBtn.disabled = true;

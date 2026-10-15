@@ -6,6 +6,7 @@ date: "2026-10-12T15:00:00+08:00"
 category: "daily"
 tags: ["自我介绍", "AI应用开发", "食品制造", "建站"]
 cover: "/covers/hello-lxx.webp"
+pinned: true
 ---
 
 一个做 AI 的人，现在天天琢磨的，是 SOP 和检查标准。

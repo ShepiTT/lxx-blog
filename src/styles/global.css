@@ -291,6 +291,7 @@ body.drawer-open .drawer { transform: none; }
 .post-title a:hover { color: var(--hover); }
 .post-meta { display: flex; flex-wrap: wrap; align-items: center; gap: 0 6px; color: var(--text-2); font-size: 13px; }
 .post-meta span { display: inline-flex; align-items: center; gap: 3px; }
+.post-meta .post-pin { padding: 1px 7px; border-radius: 4px; background: var(--theme-soft); color: var(--theme); font-weight: 600; }
 .post-meta a:hover { color: var(--hover); }
 .post-meta .sep { opacity: .5; }
 .post-meta .dot { margin: 0 3px; }

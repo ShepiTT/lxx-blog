@@ -23,6 +23,7 @@ export interface BlogData {
   tags: string[];
   cover?: string;
   draft: boolean;
+  pinned: boolean;
 }
 
 const toDateString = (value: unknown) => {
@@ -53,7 +54,7 @@ export function cleanData(raw: Record<string, unknown>): { data: BlogData } | { 
   if (!description) return { error: '请填写摘要' };
   if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) return { error: '日期格式应为 2026-10-10' };
   if (!CATEGORIES.some((c) => c.id === category)) return { error: '请选择分类' };
-  return { data: { title, description, date, category, tags: strings(raw.tags), ...(cover ? { cover } : {}), draft: Boolean(raw.draft) } };
+  return { data: { title, description, date, category, tags: strings(raw.tags), ...(cover ? { cover } : {}), draft: Boolean(raw.draft), pinned: raw.pinned === true } };
 }
 
 /** Summary used by the dashboard list. */

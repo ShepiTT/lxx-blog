@@ -17,14 +17,19 @@ interface Props {
   heading?: string;
   firstAnchor?: string;
   emptyText?: string;
+  /** Home lists keep pinned posts ahead of the date-sorted posts before pagination. */
+  prioritizePinned?: boolean;
 }
-const { all, posts, page, base, current = 'all', heading, firstAnchor, emptyText = '还没有文章，新的内容会在这里更新。' } = Astro.props;
-const visible = pageSlice(posts, page);
+const { all, posts, page, base, current = 'all', heading, firstAnchor, emptyText = '还没有文章，新的内容会在这里更新。', prioritizePinned = false } = Astro.props;
+const ordered = prioritizePinned
+  ? [...posts].sort((a, b) => Number(b.data.pinned) - Number(a.data.pinned))
+  : posts;
+const visible = pageSlice(ordered, page);
 ---
 
 <CategoryNav posts={all} current={current} heading={heading} />
 {posts.length === 0 && <div class="card empty-state">{emptyText}</div>}
 <div class="post-list">
-  {visible.map((post, i) => <PostCard post={post} eager={page === 1 && i === 0} />)}
+  {visible.map((post, i) => <PostCard post={post} eager={page === 1 && i === 0} pinned={prioritizePinned && post.data.pinned} />)}
 </div>
 <Pagination current={page} total={pageCount(posts.length)} base={base} firstAnchor={firstAnchor} />
