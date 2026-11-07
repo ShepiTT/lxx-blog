@@ -1,5 +1,5 @@
 // Refreshes src/data/projects.json from the public repositories of the GitHub account
-// linked in src/data/site.json (socials → GitHub). Forks and archived repos are skipped.
+// linked in src/data/site.json (socials → GitHub). Includes forks and archived public repos.
 // Usage: npm run projects:sync
 import { readFileSync, writeFileSync } from 'node:fs';
 
@@ -12,19 +12,27 @@ if (!user) {
   process.exit(1);
 }
 
-const res = await fetch(`https://api.github.com/users/${user}/repos?type=owner&sort=pushed&per_page=100`, {
-  headers: { Accept: 'application/vnd.github+json', 'User-Agent': 'lxx-blog-sync-projects' },
-});
-if (!res.ok) {
-  console.error(`sync-projects: GitHub 返回 ${res.status}，稍后再试`);
-  process.exit(1);
+// Read every page so the list stays complete when the account grows.
+const repos = [];
+for (let page = 1; ; page++) {
+  const res = await fetch(`https://api.github.com/users/${user}/repos?type=owner&sort=pushed&per_page=100&page=${page}`, {
+    headers: { Accept: 'application/vnd.github+json', 'User-Agent': 'lxx-blog-sync-projects' },
+  });
+  if (!res.ok) throw new Error(`sync-projects: GitHub 返回 ${res.status}，未覆盖现有列表`);
+  const batch = await res.json();
+  repos.push(...batch);
+  if (batch.length < 100) break;
 }
-
-const projects = (await res.json())
-  .filter((r) => !r.fork && !r.archived && !r.private)
+const descriptions = {
+  'Document-Processing-Tool': '面向医疗器械注册申报的文档批量处理工具，支持 ZIP 解压、文件夹整理、Word 转 PDF、重命名与 PDF 合并。',
+};
+const projects = repos
+  .filter((r) => !r.private)
   .map((r) => ({
     name: r.name,
-    description: r.description ?? '',
+    description: r.description || descriptions[r.name] || '',
+    fork: r.fork,
+    archived: r.archived,
     url: r.html_url,
     homepage: r.homepage || '',
     language: r.language ?? '',

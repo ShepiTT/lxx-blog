@@ -6,6 +6,8 @@ import { SOCIALS } from '../site.config';
 
 interface Project {
   name: string;
+  fork?: boolean;
+  archived?: boolean;
   description: string;
   url: string;
   homepage: string;
@@ -35,6 +37,8 @@ const LANGUAGE_COLORS: Record<string, string> = {
           <strong class="project-name"><Icon name="repo" size={16} /> {p.name}</strong>
           <p class="project-desc">{p.description || '暂无简介'}</p>
           <span class="project-meta">
+            {p.fork && <span>Fork 仓库</span>}
+            {p.archived && <span>已归档</span>}
             {p.language && <span><i class="lang-dot" style={`background:${LANGUAGE_COLORS[p.language] ?? '#8b949e'}`}></i>{p.language}</span>}
             {p.stars > 0 && <span><Icon name="star" size={13} /> {p.stars}</span>}
             <span>更新于 {p.updated}</span>
