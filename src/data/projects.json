@@ -8,7 +8,7 @@
     "homepage": "",
     "language": "Python",
     "stars": 4,
-    "updated": "2026-11-05"
+    "updated": "2026-11-07"
   },
   {
     "name": "Voice-controlled-Q-A-system",
@@ -20,6 +20,17 @@
     "language": "Python",
     "stars": 1,
     "updated": "2025-12-31"
+  },
+  {
+    "name": "lxx-blog",
+    "description": "Lxx的日常 博客",
+    "fork": false,
+    "archived": false,
+    "url": "https://github.com/ShepiTT/lxx-blog",
+    "homepage": "https://shepitt.vercel.app",
+    "language": "Astro",
+    "stars": 0,
+    "updated": "2026-11-07"
   },
   {
     "name": "work-cheer",
