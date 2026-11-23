@@ -17,6 +17,8 @@ interface Project {
 }
 const projects = projectsJson as Project[];
 const profile = SOCIALS.find((s) => s.icon === 'github')?.href;
+const cetRepository = 'https://github.com/ShepiTT/CET_practice_questions';
+const cetPage = '/projects/cet/';
 
 // GitHub's own language colours for the ones likely to show up.
 const LANGUAGE_COLORS: Record<string, string> = {
@@ -32,19 +34,40 @@ const LANGUAGE_COLORS: Record<string, string> = {
       {profile && <a class="more-link" href={profile} target="_blank" rel="noopener">在 GitHub 查看全部 <Icon name="chevron" size={14} /></a>}
     </div>
     <div class="project-grid">
-      {projects.map((p) => (
-        <a class="project-card" href={p.url} target="_blank" rel="noopener">
-          <strong class="project-name"><Icon name="repo" size={16} /> {p.name}</strong>
-          <p class="project-desc">{p.description || '暂无简介'}</p>
-          <span class="project-meta">
-            {p.fork && <span>Fork 仓库</span>}
-            {p.archived && <span>已归档</span>}
-            {p.language && <span><i class="lang-dot" style={`background:${LANGUAGE_COLORS[p.language] ?? '#8b949e'}`}></i>{p.language}</span>}
-            {p.stars > 0 && <span><Icon name="star" size={13} /> {p.stars}</span>}
-            <span>更新于 {p.updated}</span>
-          </span>
-        </a>
-      ))}
+      {projects.map((p) => {
+        const isCet = p.url.toLowerCase() === cetRepository.toLowerCase();
+        const Card = isCet ? 'article' : 'a';
+        return (
+          <Card class="project-card" href={isCet ? undefined : p.url} target={isCet ? undefined : '_blank'} rel={isCet ? undefined : 'noopener'}>
+            <strong class="project-name">
+              <Icon name="repo" size={16} />
+              {isCet ? <a href={cetPage}>{p.name}</a> : p.name}
+            </strong>
+            <p class="project-desc">{isCet ? '英语四六级离线刷题工具，支持整卷练习、专项训练、听力播放和错题复习。' : p.description || '暂无简介'}</p>
+            <span class="project-meta">
+              {p.fork && <span>Fork 仓库</span>}
+              {p.archived && <span>已归档</span>}
+              {p.language && <span><i class="lang-dot" style={`background:${LANGUAGE_COLORS[p.language] ?? '#8b949e'}`}></i>{p.language}</span>}
+              {p.stars > 0 && <span><Icon name="star" size={13} /> {p.stars}</span>}
+              <span>更新于 {p.updated}</span>
+            </span>
+            {isCet && (
+              <div class="project-actions">
+                <a class="cet-project-link" href={cetPage}>项目介绍与下载 <Icon name="chevron" size={14} /></a>
+                <a href={p.url} target="_blank" rel="noopener">GitHub 源码</a>
+              </div>
+            )}
+          </Card>
+        );
+      })}
     </div>
   </section>
 )}
+
+<style>
+  .project-actions { display: flex; flex-wrap: wrap; gap: 8px 14px; align-items: center; margin-top: 4px; font-size: 13px; }
+  .project-actions a { display: inline-flex; align-items: center; gap: 3px; }
+  .cet-project-link { padding: 3px 10px; border-radius: 6px; background: #ffd84d; color: #1a1f2e; font-weight: 700; }
+  .cet-project-link:hover { background: #f0c632; color: #1a1f2e; }
+  .project-actions a:not(.cet-project-link):hover { text-decoration: underline; }
+</style>

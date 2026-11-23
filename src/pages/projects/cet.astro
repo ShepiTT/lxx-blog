@@ -1,0 +1,267 @@
+---
+const repository = 'https://github.com/ShepiTT/CET_practice_questions';
+const version = '1.2.1';
+const release = `${repository}/releases/tag/v${version}`;
+const assets = `${repository}/releases/download/v${version}`;
+const title = '英语四六级真题练习';
+const description = '按卷刷题、练专项、听录音、复习错题。下载 Windows 版，离线练习 CET-4 和 CET-6 真题。';
+const canonical = new URL('/projects/cet/', Astro.site);
+const screenshot = new URL('/projects/cet/home.jpg', Astro.site);
+const editions = [
+  {
+    title: 'Windows 桌面版',
+    description: '用独立窗口刷题。适合电脑已装 Edge WebView2 和 .NET 运行环境的同学。',
+    executable: 'CETPractice.exe',
+    url: `${assets}/cet-practice-${version}-windows-desktop-x64.zip`,
+    label: '下载桌面版',
+  },
+  {
+    title: 'Windows 网页启动器',
+    description: '用默认浏览器刷题。练完后，在启动器控制窗点「关闭服务」。',
+    executable: 'CETPractice-Web.exe',
+    url: `${assets}/cet-practice-${version}-windows-web-launcher-x64.zip`,
+    label: '下载网页启动器',
+  },
+];
+---
+
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{title} · Lxx的日常</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonical} />
+    <link rel="icon" href="/projects/cet/favicon.svg" type="image/svg+xml" />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:image" content={screenshot} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:type" content="website" />
+    <meta name="twitter:card" content="summary_large_image" />
+  </head>
+  <body>
+    <a class="skip" href="#main">跳到正文</a>
+    <header class="shell site-header">
+      <a class="wordmark" href="/projects/cet/">
+        <img src="/projects/cet/favicon.svg" width="30" height="30" alt="" />
+        <strong>CET</strong><span>真题练习</span>
+      </a>
+      <nav aria-label="项目导航">
+        <a href="/about/#projects-title">返回博客</a>
+        <a href={repository}>GitHub 源码 <span aria-hidden="true">↗</span></a>
+      </nav>
+    </header>
+
+    <main id="main" class="shell">
+      <section class="hero" aria-labelledby="page-title">
+        <div class="hero-copy">
+          <p class="eyebrow">CET-4 <span aria-hidden="true">·</span> CET-6</p>
+          <h1 id="page-title">英语四六级<br /><mark>真题练习</mark></h1>
+          <p class="lede">按年份做整套真题，也可以只练听力、阅读等专项。做完看解析，把错题留到下次复习。</p>
+          <a class="button button-primary" href="#downloads">下载 Windows 版 <span aria-hidden="true">↓</span></a>
+          <dl class="stats">
+            <div><dt>套真题</dt><dd>94</dd></div>
+            <div><dt>道客观题</dt><dd>5,064</dd></div>
+            <div><dt>试卷年份</dt><dd>2019–2026</dd></div>
+          </dl>
+        </div>
+        <figure class="hero-shot">
+          <a href="/projects/cet/home.jpg" target="_blank" rel="noopener" aria-label="新标签页查看完整首页截图">
+            <img src="/projects/cet/home.jpg" width="1265" height="712" alt="刷题系统首页，显示练习进度和专项刷题入口" fetchpriority="high" />
+          </a>
+          <figcaption>刷题系统首页 <a href="/projects/cet/home.jpg" target="_blank" rel="noopener">查看大图 <span aria-hidden="true">↗</span></a></figcaption>
+        </figure>
+      </section>
+
+      <section class="section" id="downloads" aria-labelledby="download-title">
+        <div class="section-head">
+          <div>
+            <h2 id="download-title">下载与使用</h2>
+            <p>支持 Windows 10/11 x64，无需安装 Python。</p>
+          </div>
+          <a class="version" href={release} aria-label={`查看 v${version} 版本说明`}>v{version} <span aria-hidden="true">↗</span></a>
+        </div>
+        <div class="download-grid">
+          {editions.map((edition) => (
+            <article class="download-card">
+              <h3>{edition.title}</h3>
+              <p>{edition.description}</p>
+              <p class="run">完整解压后运行 <code>{edition.executable}</code></p>
+              <div class="download-action">
+                <a class="button button-primary" href={edition.url}>{edition.label} <span aria-hidden="true">↓</span></a>
+                <span>ZIP · 约 835 MiB</span>
+              </div>
+            </article>
+          ))}
+        </div>
+        <div class="download-notes">
+          <p>两个版本都自带题库、试卷、答案 PDF 和听力音频，可离线练习。练习进度和错题保存在本机。升级前请先退出旧程序，再解压到新文件夹。</p>
+          <p>下载的是未签名便携版，请保留完整解压目录。<a href={`${assets}/SHA256SUMS.txt`}>查看 SHA-256 校验值</a> · <a href={release}>查看版本说明</a></p>
+        </div>
+      </section>
+
+      <section class="section" aria-labelledby="screens-title">
+        <div class="section-head">
+          <h2 id="screens-title">界面预览</h2>
+        </div>
+        <div class="screen-grid">
+          <figure>
+            <a href="/projects/cet/special-practice.jpg" target="_blank" rel="noopener" aria-label="新标签页查看完整专项刷题截图">
+              <img src="/projects/cet/special-practice.jpg" width="1265" height="712" alt="专项刷题界面，选择考试等级、题组数量和题型" loading="lazy" />
+            </a>
+            <figcaption>
+              <strong>专项刷题</strong>
+              <p>按四级、六级筛选，集中练听力、选词填空、段落匹配或仔细阅读。</p>
+            </figcaption>
+          </figure>
+          <figure>
+            <a href="/projects/cet/listening-practice.jpg" target="_blank" rel="noopener" aria-label="新标签页查看完整听力练习截图">
+              <img src="/projects/cet/listening-practice.jpg" width="1265" height="712" alt="听力练习界面，同页显示录音控件、原文入口和答题选项" loading="lazy" />
+            </a>
+            <figcaption>
+              <strong>听力练习</strong>
+              <p>从当前题组的起点播放录音，按需展开原文和解析。</p>
+            </figcaption>
+          </figure>
+        </div>
+      </section>
+    </main>
+
+    <footer class="shell site-footer">
+      <a href="/about/#projects-title"><span aria-hidden="true">←</span> 返回「关于我」</a>
+      <a href={repository}>GitHub 源码 <span aria-hidden="true">↗</span></a>
+    </footer>
+  </body>
+</html>
+
+<style>
+  :global(:root) {
+    color-scheme: light;
+    --paper: #f3f0e8;
+    --sheet: #fcfbf7;
+    --ink: #1a1f2e;
+    --quiet: #474d5e;
+    --rule: #ddd8cb;
+    --strong-rule: #c6c0b0;
+    --blue: #2a46a6;
+    --marker: #ffd84d;
+    --frame: #fffdfa;
+    --button: #1a1f2e;
+    --button-text: #fcfbf7;
+    --shadow: 0 18px 38px -28px rgba(26, 31, 46, .4);
+    --sans: "Segoe UI", "Microsoft YaHei UI", "Microsoft YaHei", "PingFang SC", "Noto Sans CJK SC", system-ui, sans-serif;
+    --serif: "Sitka Heading", Georgia, "PingFang SC", "Microsoft YaHei", "Noto Sans CJK SC", serif;
+    --mono: "Cascadia Mono", Consolas, ui-monospace, monospace;
+    scroll-behavior: smooth;
+  }
+
+  :global(*), :global(*::before), :global(*::after) { box-sizing: border-box; }
+  body { margin: 0; color: var(--ink); background: var(--paper); font: 16px/1.65 var(--sans); }
+  .shell { width: min(1180px, calc(100% - clamp(32px, 8vw, 100px))); margin-inline: auto; }
+  a { color: inherit; text-underline-offset: .22em; }
+  a:focus-visible { outline: 2px solid var(--blue); outline-offset: 4px; }
+  .skip { position: absolute; top: 8px; left: 8px; z-index: 1; padding: 6px 12px; background: var(--sheet); transform: translateY(-150%); }
+  .skip:focus { transform: none; }
+  .site-header, .site-footer {
+    display: flex; align-items: center; justify-content: space-between; gap: 12px 24px;
+    padding-block: 17px; border-bottom: 1px solid var(--rule);
+  }
+  .wordmark, nav, .site-footer { display: flex; flex-wrap: wrap; align-items: center; }
+  .wordmark { gap: 7px; text-decoration: none; white-space: nowrap; }
+  .wordmark img { display: block; }
+  .wordmark strong { font: 700 23px/1 var(--serif); }
+  .wordmark span { padding-left: 9px; margin-left: 3px; border-left: 1px solid var(--rule); color: var(--quiet); font-size: 13px; }
+  nav { justify-content: flex-end; gap: 8px clamp(12px, 2.3vw, 26px); }
+  nav a, .site-footer a { color: var(--quiet); font-size: 14px; text-decoration: none; }
+  nav a:hover, .site-footer a:hover { text-decoration: underline; }
+  .hero {
+    display: grid; align-items: center; grid-template-columns: minmax(0, 4fr) minmax(0, 6fr);
+    gap: clamp(24px, 5vw, 68px); padding-block: clamp(44px, 6.5vw, 90px) clamp(38px, 5.5vw, 68px);
+  }
+  .eyebrow { margin: 0 0 12px; color: var(--quiet); font: 600 13px/1.4 var(--mono); letter-spacing: .13em; }
+  .eyebrow span { margin-inline: 4px; }
+  h1, h2, h3, p, figure, dl, dd { margin: 0; }
+  h1 { font: 650 clamp(40px, 5.3vw, 75px)/1.12 var(--serif); letter-spacing: -.045em; }
+  mark {
+    padding-inline: .04em .08em; color: inherit;
+    background: linear-gradient(transparent 72%, var(--marker) 72%, var(--marker) 94%, transparent 94%);
+  }
+  .lede { margin-block: 20px; max-width: 29em; color: var(--quiet); }
+  .button {
+    display: inline-flex; gap: 9px; align-items: center; justify-content: center; min-height: 44px;
+    padding: 9px 15px; border: 1px solid transparent; border-radius: 9px;
+    font-size: 14px; font-weight: 700; text-decoration: none; text-align: center;
+  }
+  .button-primary { background: var(--button); color: var(--button-text); }
+  .button-primary:hover { background: var(--blue); color: #fff; }
+  .stats { display: flex; flex-wrap: wrap; gap: 14px 21px; margin-top: 28px; padding-top: 18px; border-top: 1px solid var(--rule); }
+  .stats div { display: flex; flex-direction: column-reverse; gap: 3px; }
+  .stats dd { font: 700 clamp(19px, 2vw, 27px)/1.1 var(--serif); font-variant-numeric: lining-nums tabular-nums; }
+  .stats dt { color: var(--quiet); font-size: 12px; }
+  .hero-shot, .screen-grid figure {
+    min-width: 0; padding: 8px; background: var(--sheet); border: 1px solid var(--rule);
+    border-radius: 15px; box-shadow: var(--shadow);
+  }
+  figure > a { display: block; border-radius: 8px; }
+  figure img { display: block; width: 100%; height: auto; border: 1px solid var(--rule); border-radius: 8px; background: var(--frame); }
+  .hero-shot figcaption { display: flex; justify-content: space-between; gap: 8px; padding: 9px 5px 2px; color: var(--quiet); font-size: 13px; }
+  .hero-shot figcaption a, .download-notes a { color: var(--blue); }
+  .section { padding-block: 23px 44px; border-top: 4px double var(--ink); scroll-margin-top: 16px; }
+  .section-head { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; margin-bottom: 17px; }
+  .section-head h2 { font: 650 clamp(26px, 3vw, 35px)/1.2 var(--serif); }
+  .section-head p { margin-top: 6px; color: var(--quiet); }
+  .version {
+    padding: 3px 8px; border: 1px solid var(--strong-rule); border-radius: 6px;
+    font: 600 13px/1.5 var(--mono); text-decoration: none; white-space: nowrap;
+  }
+  .version:hover { border-color: var(--blue); text-decoration: underline; }
+  .download-grid, .screen-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+  .download-card {
+    display: flex; flex-direction: column; padding: clamp(16px, 2.4vw, 26px); background: var(--sheet);
+    border: 1px solid var(--rule); border-radius: 15px; box-shadow: var(--shadow);
+  }
+  h3 { margin-bottom: 7px; font: 650 23px/1.3 var(--serif); }
+  .download-card p, .download-notes, .screen-grid figcaption p { color: var(--quiet); font-size: 14px; }
+  .download-card .run { margin-block: 9px 17px; }
+  .run code { color: var(--ink); font: 600 13px/1.5 var(--mono); overflow-wrap: anywhere; }
+  .download-action { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 13px; margin-top: auto; color: var(--quiet); font-size: 12px; }
+  .download-notes { display: grid; gap: 5px; margin-top: 14px; }
+  .screen-grid figcaption { padding: 10px 9px 7px; }
+  .screen-grid figcaption strong { font-size: 17px; }
+  .screen-grid figcaption p { margin-top: 3px; }
+  .site-footer { border-top: 1px solid var(--rule); border-bottom: 0; padding-block: 20px 30px; }
+
+  @media (max-width: 780px) {
+    .hero { grid-template-columns: 1fr; }
+    .stats { max-width: 29em; }
+  }
+  @media (max-width: 620px) {
+    .download-grid, .screen-grid { grid-template-columns: 1fr; }
+  }
+  @media (max-width: 390px) {
+    .wordmark span { display: none; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    :global(:root) { scroll-behavior: auto; }
+  }
+  @media (prefers-color-scheme: dark) {
+    :global(:root) {
+      color-scheme: dark;
+      --paper: #121419;
+      --sheet: #191c23;
+      --ink: #ece8dd;
+      --quiet: #bdb9ae;
+      --rule: #2b2f39;
+      --strong-rule: #575c69;
+      --blue: #a3b6ff;
+      --marker: #806824;
+      --frame: #1f222a;
+      --button: #ffd84d;
+      --button-text: #1a1f2e;
+      --shadow: 0 18px 38px -28px rgba(0, 0, 0, .85);
+    }
+    .button-primary:hover { color: #1a1f2e; }
+  }
+</style>
