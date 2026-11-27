@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "private": true,
   "type": "module",
+  "license": "PolyForm-Noncommercial-1.0.0",
   "description": "Lxx的日常：AI 应用开发、日常与感悟",
   "scripts": {
     "dev": "astro dev",
