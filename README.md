@@ -2,6 +2,10 @@
 
 记录 AI 应用开发的探索，也记录日常与感悟。用 [Astro](https://astro.build) 构建，部署在 Vercel。
 
+## 许可证
+
+本项目的站点代码和原创内容采用 [PolyForm Noncommercial License 1.0.0](./LICENSE) 许可。允许个人和非商业用途，禁止商业使用。第三方依赖和主题代码保留其各自的许可证。
+
 正式网址：https://lanjiangtao.cn/ 。RSS 订阅：https://lanjiangtao.cn/rss.xml 。
 HTTP 和带 `www` 的地址会跳转到 HTTPS 主域名。
 
